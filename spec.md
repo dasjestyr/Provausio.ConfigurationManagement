@@ -12,3 +12,4 @@ Microservice architecture introduces a problem where propagating configuration c
 ## Other ideas
 - Support configuration inheritance or composition. As a convenience, common configurations can be added to an application's configuration. For example, our NServiceBus configuration is shaped the same way in all applications, so instead of recreating that structure in a different application, simply import the structure. This may even go further than the structure itself, and also include default settings.
     - Should probably limit editing to this structure ad-hoc. For example, an application can add fields to the imported structure but not remove or rename anything.
+
