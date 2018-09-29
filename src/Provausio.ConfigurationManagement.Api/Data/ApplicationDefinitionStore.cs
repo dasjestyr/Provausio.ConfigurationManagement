@@ -1,5 +1,6 @@
 ﻿namespace Provausio.ConfigurationManagement.Api.Data
 {
+    using System.Collections.Generic;
     using System.Linq;
     using MongoDB.Driver;
     using Schemas;
@@ -7,7 +8,7 @@
     using Model;
 
 
-    public class ApplicationDefinitionStore 
+    public class ApplicationDefinitionStore : IApplicationDefinitionStore
     {
         private readonly IMongoCollection<ApplicationDefinition> _collection;
 
@@ -21,6 +22,20 @@
             var data = MapApplication(application);
             data.ApplicationId = appId;
             return _collection.InsertOneAsync(data);
+        }
+
+        public async Task<IEnumerable<ApplicationInfo>> GetApplications()
+        {
+            var results = await _collection.Find(_ => true).ToListAsync();
+            return results.Select(MapApplicationInfo);
+        }
+
+        public async Task<ApplicationInfo> GetApplication(string id)
+        {
+            var result = await _collection.FindAsync(
+                Builders<ApplicationDefinition>.Filter.Eq(doc => doc.ApplicationId, id));
+            var def = await result.FirstOrDefaultAsync();
+            return def == null ? null : MapApplicationInfo(def);
         }
 
         public Task UpdateApplication(string appId, ApplicationInfo application)
@@ -47,20 +62,51 @@
                 new UpdateOptions {IsUpsert = true});
         }
 
+        public async Task<IEnumerable<EnvironmentInfo>> GetEnvironments(string appId)
+        {
+            
+            var query = _collection
+                .Find(Builders<ApplicationDefinition>.Filter.Eq(doc => doc.ApplicationId, appId))
+                .Project(definition => definition.Environments);
+
+            var results = await query.ToListAsync();
+
+            return results.FirstOrDefault()?.Select(MapEnvironmentInfo);
+        }
+
         public Task UpdateEnvironment(string appId, string environmentId, EnvironmentInfo environment)
         {
             var replacement = MapEnvironment(environment);
             return _collection.FindOneAndUpdateAsync(
-                c => c.ApplicationId == appId && c.Environments.Any(e => e.EnvironmentId == appId),
+                c => c.ApplicationId == appId && c.Environments.Any(e => e.EnvironmentId == environmentId),
                 Builders<ApplicationDefinition>.Update.Set(doc => doc.Environments[-1], replacement));
         }
 
         public Task DeleteEnvironment(string appId, string environmentId)
         {
             return _collection.FindOneAndUpdateAsync(
-                c => c.ApplicationId == appId && c.Environments.Any(e => e.EnvironmentId == appId),
+                c => c.ApplicationId == appId && c.Environments.Any(e => e.EnvironmentId == environmentId),
                 Builders<ApplicationDefinition>.Update.PullFilter(doc => doc.Environments,
                     el => el.EnvironmentId == environmentId));
+        }
+
+        public Task SaveConfiguration(string appId, string environmentId, ConfigurationInfo info)
+        {
+            var configData = MapConfiguration(info);
+            return _collection.FindOneAndUpdateAsync(
+                c => c.ApplicationId == appId && c.Environments.Any(e => e.EnvironmentId == environmentId),
+                Builders<ApplicationDefinition>.Update.Set(doc => doc.Environments[-1].Configuration, configData));
+        }
+
+        public async Task<ConfigurationInfo> GetConfiguration(string appId, string environmentId)
+        {
+            var result = await _collection
+                .Find(doc => doc.ApplicationId == appId && doc.Environments.Any(e => e.EnvironmentId == environmentId))
+                .Project(doc => doc.Environments[-1].Configuration)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            return result == null ? null : MapConfigurationInfo(result);
         }
 
         private static ApplicationDefinition MapApplication(ApplicationInfo info)
@@ -74,6 +120,16 @@
             return data;
         }
 
+        private static ApplicationInfo MapApplicationInfo(ApplicationDefinition definition)
+        {
+            return new ApplicationInfo
+            {
+                Name = definition.Name,
+                Description = definition.Description,
+                Metadata = definition.Metadata
+            };
+        }
+
         private static Environment MapEnvironment(EnvironmentInfo info)
         {
             var environment = new Environment
@@ -84,6 +140,35 @@
                 Metadata = info.Metadata
             };
             return environment;
+        }
+
+        private static EnvironmentInfo MapEnvironmentInfo(Environment definition)
+        {
+            return new EnvironmentInfo
+            {
+                Name = definition.Name,
+                Description = definition.Description,
+                RequiredPermission = definition.RequiredPermission,
+                Metadata = definition.Metadata
+            };
+        }
+
+        private static Configuration MapConfiguration(ConfigurationInfo info)
+        {
+            return new Configuration
+            {
+                Content = info.Content,
+                Metadata = info.Metadata
+            };
+        }
+
+        private static ConfigurationInfo MapConfigurationInfo(Configuration definition)
+        {
+            return new ConfigurationInfo
+            {
+                Content = definition.Content,
+                Metadata = definition.Metadata
+            };
         }
     }
 }

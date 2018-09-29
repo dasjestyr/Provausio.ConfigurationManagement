@@ -17,7 +17,7 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
                 return client.GetDatabase("configurationManagement");
             });
 
-            services.AddTransient<ApplicationDefinitionStore>();
+            services.AddTransient<IApplicationDefinitionStore, ApplicationDefinitionStore>();
         }
     }
 }
