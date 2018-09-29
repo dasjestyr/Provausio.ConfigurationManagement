@@ -1,0 +1,14 @@
+﻿<Properties StartupConfiguration="{0DD6DBD2-E1F4-4E70-9524-9D3A3ECAB286}|Default">
+  <MonoDevelop.Ide.ItemProperties.Provausio.ConfigurationManagement.Api PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Provausio.ConfigurationManagement.Api/Controllers/ApplicationsController.cs">
+    <Files>
+      <File FileName="Provausio.ConfigurationManagement.Api/Controllers/ApplicationsController.cs" Line="22" Column="19" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>

@@ -1,10 +1,13 @@
-using System;
-using Microsoft.AspNetCore.Mvc;
-
-public abstract class RestController : Controller
+namespace Provausio.ConfigurationManagement.Api.Controllers
 {
-    protected IActionResult CreatedWithLocation(string id, object responseObject)
+    using System;
+    using Microsoft.AspNetCore.Mvc;
+
+    public abstract class RestController : Controller
     {
-        return Created(new Uri($"{Request.Path}/{id}", UriKind.Relative), responseObject);
+        protected IActionResult CreatedWithLocation(string id, object responseObject)
+        {
+            return Created(new Uri($"{Request.Path}/{id}", UriKind.Relative), responseObject);
+        }
     }
 }
