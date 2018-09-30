@@ -32,12 +32,14 @@
                             <v-layout wrap>
                                 <v-flex xs12>
                                     <v-text-field color="secondary"
+                                        v-model="newApplication.name"
                                         required
                                         hint="Name of the application"
                                         label="Name"></v-text-field>
                                 </v-flex>
                                 <v-flex xs12>
                                     <v-textarea color="secondary"
+                                        v-model="newApplication.description"
                                         required
                                         hint="What does the application do?"
                                         label="Description"></v-textarea>
@@ -58,33 +60,33 @@
 
 <script>
 import AppService from '../services/ApplicationService.js'
+const appService = new AppService()
 export default {
     name: 'applications',
     data: () => ({
         newAppDialog: false,
+        newApplication: { name: '', description: ''},
         searchTerm: "",
         applications: []
     }),
     methods: {        
-        createNew() {
+        async createNew() {
             this.newAppDialog = false
-            // TODO do save and get id
-            let id = "4"
-            this.$router.push(`applications/${id}`)
+            let newId = await appService.createApplication(this.newApplication)
+            this.$router.push(`applications/${newId}`)
         },
         goToApp(id) {
             this.$router.push(`applications/${id}`)
         }
     },
-    async mounted(){
-        let appService = new AppService()
-        this.applications = await appService.getApplications()
-        
+    async mounted(){        
+        this.applications = await appService.getApplications()        
     },
     computed: {
         filteredApplications() {
             let vm = this
             return vm.applications.filter(item => {
+                    if(!vm.searchTerm) return item;
                     return item.name.toLowerCase().indexOf(vm.searchTerm.toLowerCase()) !== -1
                 })
         }

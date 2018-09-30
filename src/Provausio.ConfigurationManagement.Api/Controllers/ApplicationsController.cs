@@ -27,19 +27,30 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         [HttpGet, Route("")]
         public async Task<IActionResult> GetApplications()
         {
-            var environments = await _definitionStore.GetApplications().ConfigureAwait(false);
-            if (environments == null || !environments.Any())
+            if(!ModelState.IsValid) return BadRequest();
+            var applications = await _definitionStore.GetApplications().ConfigureAwait(false);
+            if (applications == null || !applications.Any())
                 return NotFound();
-            return Ok(environments);
+            return Ok(applications);
+        }
+
+        [HttpGet, Route("{appId}")]
+        public async Task<IActionResult> GetApplication(string appId)
+        {
+            var application = await _definitionStore.GetApplication(appId).ConfigureAwait(false);
+            if(application == null)
+                return NotFound();
+            return Ok(application);
         }
 
         /// <summary>
         /// Defines a new application.
         /// </summary>
         /// <returns></returns>
-        [HttpPost, Route("/")]
-        public async Task<IActionResult> CreateApplication(ApplicationInfo payload)
+        [HttpPost, Route("")]
+        public async Task<IActionResult> CreateApplication([FromBody] ApplicationInfo payload)
         {
+            if(!ModelState.IsValid) return BadRequest(ModelState);
             var appId = Xid.NewXid().ToString();
             payload.ApplicationId = appId;
             await _definitionStore.CreateApplication(appId, payload).ConfigureAwait(false);
@@ -53,8 +64,8 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// <param name="applicationId"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        [HttpPut, Route("/{applicationId}")]
-        public async Task<IActionResult> UpdateApplication(string applicationId, ApplicationInfo payload)
+        [HttpPut, Route("{applicationId}")]
+        public async Task<IActionResult> UpdateApplication(string applicationId, [FromBody] ApplicationInfo payload)
         {
             await _definitionStore.UpdateApplication(applicationId, payload).ConfigureAwait(false);
             return Ok(payload);
@@ -65,7 +76,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// </summary>
         /// <param name="applicationId"></param>
         /// <returns></returns>
-        [HttpDelete, Route("/{applicationId}")]
+        [HttpDelete, Route("{applicationId}")]
         public async Task<IActionResult> DeleteApplication(string applicationId)
         {
             await _definitionStore.DeleteApplication(applicationId).ConfigureAwait(false);
@@ -77,7 +88,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// </summary>
         /// <param name="applicationId"></param>
         /// <returns></returns>
-        [HttpGet, Route("/{applicationId}/environments")]
+        [HttpGet, Route("{applicationId}/environments")]
         public async Task<IActionResult> GetEnvironments(string applicationId)
         {
             var environments = await _definitionStore.GetEnvironments(applicationId).ConfigureAwait(false);
@@ -92,8 +103,8 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// <param name="applicationId"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        [HttpPost, Route("/{applicationId}/environments")]
-        public async Task<IActionResult> AddEnvironment(string applicationId, EnvironmentInfo payload)
+        [HttpPost, Route("{applicationId}/environments")]
+        public async Task<IActionResult> AddEnvironment(string applicationId, [FromBody] EnvironmentInfo payload)
         {
             await _definitionStore.CreateEnvironment(applicationId, payload.Name, payload).ConfigureAwait(false);
             return CreatedWithLocation(payload.Name, payload);
@@ -106,8 +117,8 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// <param name="name"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        [HttpPut, Route("/{applicationId}/environments/{name}")]
-        public async Task<IActionResult> UpdateEnvironment(string applicationId, string name, EnvironmentInfo payload)
+        [HttpPut, Route("{applicationId}/environments/{name}")]
+        public async Task<IActionResult> UpdateEnvironment(string applicationId, string name, [FromBody] EnvironmentInfo payload)
         {
             if (payload.Name != name)
                 return BadRequest("names do not match");
@@ -122,7 +133,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// <param name="applicationId"></param>
         /// <param name="environmentId"></param>
         /// <returns></returns>
-        [HttpDelete, Route("/{applicationId}/environments/{environmentId}")]
+        [HttpDelete, Route("{applicationId}/environments/{environmentId}")]
         public async Task<IActionResult> DeleteEnvironment(string applicationId, string environmentId)
         {
             await _definitionStore.DeleteEnvironment(applicationId, environmentId).ConfigureAwait(false);

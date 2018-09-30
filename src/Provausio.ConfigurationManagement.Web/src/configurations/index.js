@@ -1,3 +1,3 @@
 export default {
-    apiUrl: process.env.CONFIGMGR_APIURL || 'localhost:5000'
+    apiUrl: process.env.CONFIGMGR_APIURL || 'http://localhost:5000'
 }

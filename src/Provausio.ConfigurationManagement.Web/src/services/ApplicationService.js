@@ -1,36 +1,17 @@
 import axios from 'axios'
 import config from '../configurations'
 
-const fakeData = [{
-    id: 1,
-    name: 'DAS.Services.Notifications',
-    description: 'Handles email and SMS messaging'
-}, {
-    id: 2,
-    name: 'DAS.Services.Surveys.Command',
-    description: 'Command host for surveys'
-},{
-    id: 3,
-    name: 'DAS.Services.Surveys.Query',
-    description: 'Query host for surveys'
-},{
-    id: 4,
-    name: 'DAS.Services.Reviews.Mgr.Command',
-    description: 'Command host for review management (review response)'
-},{
-    id: 5,
-    name: 'DAS.Data.ETL.Reviews',
-    description: 'Review ingestion extraction orchestrator.'
-}]
-
 export default class ApplicationService {
 
     constructor() {        
-        this.client = axios.create(`http://${config.apiUrl}/applications`)            
+        this.client = axios.create({
+            baseURL: `${config.apiUrl}/applications`,
+            headers: { 'Content-Type': 'application/json'}
+        })            
     }
 
     async getApplications() {
-        let response = await this.client.get('http://localhost:5000/applications')
+        let response = await this.client.get('/')
         if(response.status == 200)
             return response.data.map(app => {
                 return {
@@ -42,5 +23,48 @@ export default class ApplicationService {
             })
 
         console.error(response.status)
+    }
+
+    async createApplication(appInfo) {        
+        let response = await this.client.post('/', {
+            name: appInfo.name,
+            description: appInfo.description
+        })
+        return response.data.applicationId
+    }
+
+    async getApplication(id) {
+        let response = await this.client.get(`/${id}`)
+        if(response.status == 200) {
+            return {
+                id: response.data.applicationId,
+                name: response.data.name,
+                description: response.data.description,
+                metadata: response.data.metadata
+            }
+        }
+    }
+
+    async getEnvironments(appId) {
+        return [{
+            name: "Development",
+            description: "Development/Integration environment configuration",
+            configuration: '{\n\t"property" : "foo"\n}',
+            format: 'json'
+        }, {
+            name: 'QA',
+            description: 'QA test environment',
+            configuration: 'hello editor',
+            format: 'json'
+        }, {
+            name: 'Production',
+            description: 'Production environment',
+            configuration: 'hello editor',
+            format: 'json'
+        }]
+    }
+
+    async saveEnvironment(env) {
+        console.info(`Bleep bloop, saved ${env.name}`)
     }
 }

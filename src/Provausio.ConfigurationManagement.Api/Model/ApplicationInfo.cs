@@ -1,6 +1,7 @@
 namespace Provausio.ConfigurationManagement.Api.Model
 {
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
 
     public class ApplicationInfo 
     {
@@ -13,11 +14,13 @@ namespace Provausio.ConfigurationManagement.Api.Model
         /// Name of the application or component name.
         /// </summary>
         /// <value></value>
+        [Required]
         public string Name { get; set; }
 
         /// <summary>
         /// Description of the application or component.
         /// </summary>
+        [Required]
         public string Description { get; set; }
 
         /// <summary>
