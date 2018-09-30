@@ -7,36 +7,24 @@
       app
     >
       <v-list dense>
-        <v-list-tile @click="goToApplications">
-          <v-list-tile-action>
-            <v-icon>dashboard</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Applications</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile>
-          <v-list-tile-action>
-            <v-icon>account_circle</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Users</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile>
-          <v-list-tile-action>
-            <v-icon>settings</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Settings</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
+        <template v-for="area in areas">
+          <v-list-tile :key="area.path" @click="navigate(area.path)">
+            <v-list-tile-action>
+              <v-icon color="secondary">{{area.icon}}</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              <v-list-tile-title>{{ area.name }}</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </template>        
+      </v-list>      
     </v-navigation-drawer>
-    <v-toolbar app fixed clipped-left>
-      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title>Application</v-toolbar-title>
+
+    <v-toolbar app fixed clipped-left color="primary">
+      <!-- <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon> -->
+      <v-toolbar-title>Configuration Management System</v-toolbar-title>
     </v-toolbar>
+
     <v-content>
       <v-container fluid fill-height>
         <v-layout>
@@ -44,6 +32,7 @@
         </v-layout>
       </v-container>
     </v-content>
+
     <v-footer app fixed>
       <span>&copy; 2017 Provausio</span>
     </v-footer>
@@ -53,17 +42,24 @@
 <script>
   export default {
     data: () => ({
-      drawer: true
+      drawer: true,
+      areas: [{
+        name: 'Applications',
+        path: '/applications',
+        icon: 'dashboard'
+      },{
+        name: 'Users',
+        path: '/users',
+        icon: 'account_circle'
+      },{
+        name: 'Settings',
+        path: '/settings',
+        icon: 'settings'
+      }]
     }),
     methods: {
-      goToApplications() {
-        this.$router.push('/applications')
-      },
-      goToUsers() {
-
-      },
-      goToSettings() {
-
+      navigate(path) {
+        this.$router.push(path)
       }
     },
     props: {

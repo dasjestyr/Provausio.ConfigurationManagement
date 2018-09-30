@@ -2,7 +2,8 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 
-Vue.use(Vuetify, {
+// temp
+let defaultTheme = {
   theme: {
     primary: '#ee44aa',
     secondary: '#424242',
@@ -14,4 +15,16 @@ Vue.use(Vuetify, {
   },
   customProperties: true,
   iconfont: 'fa',
+}
+
+Vue.use(Vuetify, {
+  theme: {
+    primary: '#1D4370',
+    secondary: '#326EB6',
+    accent: '#1D4370',
+    error: '#b71c1c'
+  },
+  customProperties: true,
+  iconfont: 'fa',
 })
+
