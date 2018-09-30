@@ -12,33 +12,32 @@
                 <v-tab 
                     v-for="env in environments" 
                     :key="env.name">
-                        {{env.name}}
+                        {{ env.name }}
                 </v-tab>
                 <v-tab-item
                     v-for="env in environments"
                     :key="env.name">
-                    <v-card>
-                        <v-flex pa-4>
-                            <h3>{{ env.description }}</h3>
-                            <code-editor :editor-id="env.name + '-editor'" :lang="env.format" :content="env.configuration"></code-editor>
-                            <v-flex mt-2><v-btn round color="success" @click="saveEnvironment(env.name)">Save {{ env.name }} configuration</v-btn></v-flex>
-                        </v-flex>
-                    </v-card>
+                        <environment-editor :env="env"></environment-editor>                    
                 </v-tab-item>
             </v-tabs>
         </v-flex>
-    </v-flex>    
-    
+    </v-flex>       
 </template>
 
 <script>
 import AppService from '../services/ApplicationService.js'
-import CodeEditor from '../components/CodeEditor'
+import EditEnvironment from '../components/EditEnvironment'
 const appService = new AppService()
 export default {
     data: () => ({
         application: {},
-        environments: [],
+        environments: [{
+            name: "+ New",
+            format: 'javascript',
+            configuration: '// add configuration here',
+            metadata: { isNew: true }
+        }],
+        newEnvironment: {},
         activeTab: 0
     }),
     methods: {
@@ -49,10 +48,12 @@ export default {
     },
     async mounted() {
         this.application = await appService.getApplication(this.$route.params.id)   
-        this.environments = await appService.getEnvironments(this.application.id)   
+        const items = await appService.getEnvironments(this.application.id)
+        this.environments.splice(0, 0, ...items)  
+        this.activeTab = 0
     },
     components: {
-        'code-editor': CodeEditor
+        'environment-editor': EditEnvironment
     }
 }
 </script>

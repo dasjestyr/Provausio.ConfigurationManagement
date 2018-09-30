@@ -13,7 +13,7 @@ export default {
         editor: Object,
         beforeContent: '',
         selectedLanguage: '',
-        languages: ['json', 'yaml', 'xml']
+        languages: ['json', 'javascript', 'yaml', 'xml']
     }),
     watch: {
         selectedLanguage: function(lang) {

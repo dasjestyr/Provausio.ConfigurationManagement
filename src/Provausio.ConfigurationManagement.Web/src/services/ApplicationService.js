@@ -50,21 +50,31 @@ export default class ApplicationService {
             name: "Development",
             description: "Development/Integration environment configuration",
             configuration: '{\n\t"property" : "foo"\n}',
-            format: 'json'
+            format: 'json',
+            metadata: {}
         }, {
             name: 'QA',
             description: 'QA test environment',
             configuration: 'hello editor',
-            format: 'json'
+            format: 'json',
+            metadata: {}
         }, {
             name: 'Production',
             description: 'Production environment',
             configuration: 'hello editor',
-            format: 'json'
+            format: 'json',
+            metadata: {}
         }]
+    }
+    async createEnvironment(env) {
+        console.info(`Created new environment ${env.name}`)
     }
 
     async saveEnvironment(env) {
-        console.info(`Bleep bloop, saved ${env.name}`)
+        console.info(`Saved ${env.name}`)
+    }
+
+    async deleteEnvironment(env) {
+        console.info(`KABOOM! Deleted ${env}`)
     }
 }
