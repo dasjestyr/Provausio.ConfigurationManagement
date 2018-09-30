@@ -1,19 +1,24 @@
 <template>
     <v-flex xs12>
         <h1>Applications</h1>
-        <v-flex my-2>
-            <v-icon color="secondary" style="font-size: 30px" @click="createNew">add_to_queue</v-icon>        
-        </v-flex>        
-        <v-list two-line>
-            <template v-for="app in applications">
-                <v-list-tile :key="app.appId" @click="goToApp(app.appId)">
-                    <v-list-tile-content>
-                        <v-list-tile-title>{{ app.name }}</v-list-tile-title>
-                        <v-list-tile-sub-title>{{ app.description }}</v-list-tile-sub-title>
-                    </v-list-tile-content>
-                </v-list-tile>
-            </template>
-        </v-list>
+        
+        <v-layout row>
+            <v-icon color="secondary" style="font-size: 30px" @click="createNew">add_to_queue</v-icon>                   
+            <v-text-field style="margin-left: 15px" color="accent" label="search" v-model="searchTerm"></v-text-field>    
+        </v-layout>
+        
+        <v-slide-y-transition class="py-0" group tag="v-list">        
+            <template v-for="app in filteredApplications">
+                <v-flex :key="app.appId" py-2>
+                    <v-list-tile  @click="goToApp(app.appId)">
+                        <v-list-tile-content>
+                            <v-list-tile-title>{{ app.name }}</v-list-tile-title>
+                            <v-list-tile-sub-title>{{ app.description }}</v-list-tile-sub-title>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                </v-flex>
+            </template>         
+        </v-slide-y-transition>
     </v-flex>      
 </template>
 
@@ -21,7 +26,20 @@
     export default {
         name: 'applications',
         data: () => ({
-            applications: [{
+            searchTerm: "",
+            applications: []
+        }),
+        methods: {
+            createNew() {
+                // TODO open dialog
+                console.log('create new')
+            },
+            goToApp(id) {
+                console.log(id)
+            }
+        },
+        mounted(){
+            this.applications = [{
                 appId: 1,
                 name: 'DAS.Services.Notifications',
                 description: 'Handles email and SMS messaging'
@@ -42,14 +60,13 @@
                 name: 'DAS.Data.ETL.Reviews',
                 description: 'Review ingestion extraction orchestrator.'
             }]
-        }),
-        methods: {
-            createNew() {
-                // TODO open dialog
-                console.log('create new')
-            },
-            goToApp(id) {
-                console.log(id)
+        },
+        computed: {
+            filteredApplications() {
+                let vm = this
+                return vm.applications.filter(item => {
+                        return item.name.toLowerCase().indexOf(vm.searchTerm.toLowerCase()) !== -1
+                    })
             }
         }
     }
