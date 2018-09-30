@@ -17,7 +17,7 @@ let defaultTheme = {
   iconfont: 'fa',
 }
 
-Vue.use(Vuetify, {
+let experimentalTheme = {
   theme: {
     primary: '#1D4370',
     secondary: '#326EB6',
@@ -26,5 +26,7 @@ Vue.use(Vuetify, {
   },
   customProperties: true,
   iconfont: 'fa',
-})
+}
+
+Vue.use(Vuetify, experimentalTheme)
 

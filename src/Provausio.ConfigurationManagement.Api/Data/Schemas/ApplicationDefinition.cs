@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using MongoDB.Bson;
 
 namespace Provausio.ConfigurationManagement.Api.Data.Schemas
 {
     
     public class ApplicationDefinition
     {
+        public ObjectId Id { get; set; }
+
         public string ApplicationId { get; set; }
 
         public string Name { get; set; }

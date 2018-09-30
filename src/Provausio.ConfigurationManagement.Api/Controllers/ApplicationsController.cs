@@ -24,7 +24,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// Returns a list of applications.
         /// </summary>
         /// <returns></returns>s
-        [HttpGet, Route("/")]
+        [HttpGet, Route("")]
         public async Task<IActionResult> GetApplications()
         {
             var environments = await _definitionStore.GetApplications().ConfigureAwait(false);

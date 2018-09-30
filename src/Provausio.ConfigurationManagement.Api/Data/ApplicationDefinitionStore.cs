@@ -124,6 +124,7 @@
         {
             return new ApplicationInfo
             {
+                ApplicationId = definition.ApplicationId,
                 Name = definition.Name,
                 Description = definition.Description,
                 Metadata = definition.Metadata

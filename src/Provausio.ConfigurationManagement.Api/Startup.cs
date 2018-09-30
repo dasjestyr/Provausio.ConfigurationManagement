@@ -20,13 +20,14 @@
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMongoDb(Configuration);
+            services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
+            if (!env.IsProduction())
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -35,7 +36,8 @@
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            app.UseCors(builder => builder.WithOrigins("http://localhost:8080"));
+            //app.UseHttpsRedirection();
             app.UseMvc();
         }
     }
