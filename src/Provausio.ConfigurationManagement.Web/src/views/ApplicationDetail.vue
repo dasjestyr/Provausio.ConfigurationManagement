@@ -38,8 +38,11 @@
 <script>
 
 import EditEnvironment from '../components/EditEnvironment'
-
 export default {
+    data: () => ({
+        loading: true,
+        loadingMessage: 'Hold on to your butts'
+    }),
     computed: {
         activeApplication() {
             return this.$store.getters.getActiveApplication
@@ -55,13 +58,14 @@ export default {
             name: "+ New",
             format: 'javascript',
             configuration: '// add configuration here',
-            metadata: { isNew: true }
+            metadata: { isNew: true, canEditName: true }
         }]
 
         await this.$store.dispatch('getApplication', this.$route.params.id)
         await this.$store.dispatch('getEnvironments', newEnvironmentTab)
         
         this.activeTab = 0
+        this.loading = false
     },
     async beforeDestroy() {
         // this prevents the data flip-over blip when switching between apps

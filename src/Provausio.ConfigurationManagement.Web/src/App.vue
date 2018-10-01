@@ -8,7 +8,7 @@
     >
       <v-list dense>
         <template v-for="area in areas">
-          <v-list-tile :key="area.path" @click="navigate(area.path)">
+          <v-list-tile :key="area.path" :to="area.path" active-class="nav-active">
             <v-list-tile-action>
               <v-icon color="secondary">{{area.icon}}</v-icon>
             </v-list-tile-action>
@@ -21,14 +21,15 @@
     </v-navigation-drawer>
 
     <v-toolbar app fixed clipped-left color="primary">
-      <!-- <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon> -->
       <v-toolbar-title>Configuration Management System</v-toolbar-title>
     </v-toolbar>
 
     <v-content>
       <v-container fluid fill-height>
         <v-layout>
-          <router-view></router-view>
+          <transition name="fade" mode="out-in">
+            <router-view></router-view>
+          </transition>
         </v-layout>
       </v-container>
     </v-content>
@@ -57,13 +58,25 @@
         icon: 'settings'
       }]
     }),
-    methods: {
-      navigate(path) {
-        this.$router.push(path)
-      }
-    },
     props: {
       source: String
     }
   }
 </script>
+
+<style>
+.nav-active {
+  background: #303030;;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition-duration: 0.2s;
+  transition-property: opacity;
+  transition-timing-function: ease;
+}
+
+.fade-enter,
+.fade-leave-active {
+  opacity: 0
+}
+</style>

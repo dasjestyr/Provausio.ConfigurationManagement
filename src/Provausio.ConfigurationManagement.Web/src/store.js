@@ -25,8 +25,8 @@ export default new Vuex.Store({
     ADD_APPLICATION: (state, payload) => {
       state.applications.push(payload)
     },
-    ADD_ENVIRONMENT: (state, appId, payload) => {
-      state.applications[appId].environments.push(payload)
+    ADD_ENVIRONMENT: (state, payload) => {
+      state.activeApplication.app.environments.push(payload)
     },
     SET_ENVIRONMENTS: (state, environments) => {         
       state.activeApplication.app.environments = environments
@@ -37,6 +37,7 @@ export default new Vuex.Store({
           if(e.name !== environmentName)
             return e
         })
+        state.activeApplication.activeTab = 0
     }
   },
 
@@ -72,8 +73,8 @@ export default new Vuex.Store({
       payload.id = await appService.createApplication(payload)
       context.commit('ADD_APPLICATION', payload)
     },
-    addEnvironment: (context, appId, payload) => {
-      context.commit('ADD_ENVIRONMENT', appId, payload)
+    addEnvironment: (context, payload) => {
+      context.commit('ADD_ENVIRONMENT', payload)
     },
     getEnvironments: async (context, staticTabs) => {
       let appId = context.getters.getActiveApplication.app.id

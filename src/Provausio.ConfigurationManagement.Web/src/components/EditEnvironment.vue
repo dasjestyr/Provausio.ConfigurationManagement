@@ -2,10 +2,19 @@
     <v-card>
         <v-layout pa-4 column>
             <v-flex>
-                <v-text-field color="secondary" hint="Environment name" persistent-hint="" v-model="env.name"></v-text-field>
+                <v-text-field 
+                    color="secondary" 
+                    hint="Environment name" 
+                    persistent-hint
+                    v-model="env.name"
+                    v-bind:disabled="!env.metadata.canEditName"></v-text-field>
             </v-flex>
             <v-flex>
-                <v-text-field color="secondary" hint="Environment description" persistent-hint="" v-model="env.description"></v-text-field>
+                <v-text-field 
+                    color="secondary" 
+                    hint="Environment description" 
+                    persistent-hint
+                    v-model="env.description"></v-text-field>
             </v-flex>                
         </v-layout>
         <v-flex pa-4>
@@ -31,7 +40,7 @@ export default {
         },
         async saveEnvironment(envName) {
             if(this.env.metadata.isNew) {
-                
+                this.$store.dispatch('addEnvironment', this.env)
             } else {
                 
             }
