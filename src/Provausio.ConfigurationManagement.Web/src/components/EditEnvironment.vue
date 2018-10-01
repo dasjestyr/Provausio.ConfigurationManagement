@@ -29,6 +29,12 @@
 
 <script>
 import CodeEditor from './CodeEditor'
+import xid from 'xid-js'
+
+
+
+
+
 export default {
     props: ['env'],
     data: () => ({
@@ -48,6 +54,7 @@ export default {
     },
     components: {
         'code-editor': CodeEditor
-    }
+    }    
 }
+
 </script>

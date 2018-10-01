@@ -1,11 +1,22 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import AppService from './services/ApplicationService'
+import xid from 'xid-js'
 
 Vue.use(Vuex)
 
 const appService = new AppService()
 const defaultApp = { activeTab: 0, app: {} }
+
+function getNewTab() {
+  return {
+      id: xid.next(),
+      name: '+ Add',
+      format: 'javascript',
+      configuration: '// add configuration here',
+      metadata: { isNew: true, canEditName: true }
+  }
+}
 
 export default new Vuex.Store({
   state: {
@@ -23,10 +34,10 @@ export default new Vuex.Store({
       state.activeApplication = defaultApp
     },
     ADD_APPLICATION: (state, payload) => {
-      state.applications.push(payload)
+      state.applications[payload.id] = payload
     },
     ADD_ENVIRONMENT: (state, payload) => {
-      state.activeApplication.app.environments.push(payload)
+      state.activeApplication.app.environments.splice(0, 0, payload)
     },
     SET_ENVIRONMENTS: (state, environments) => {         
       state.activeApplication.app.environments = environments
@@ -73,15 +84,18 @@ export default new Vuex.Store({
       payload.id = await appService.createApplication(payload)
       context.commit('ADD_APPLICATION', payload)
     },
+    addingEnvironment: (context) => {
+      context.commit('ADD_ENVIRONMENT', getNewTab())
+    },
     addEnvironment: (context, payload) => {
+      // TODO: save to server
       context.commit('ADD_ENVIRONMENT', payload)
     },
-    getEnvironments: async (context, staticTabs) => {
+    getEnvironments: async (context) => {
       let appId = context.getters.getActiveApplication.app.id
       let environments = await appService.getEnvironments(appId)
       
-      if(staticTabs)
-        environments.push(...staticTabs)
+      environments.push(getNewTab())
 
       context.commit('SET_ENVIRONMENTS', environments)
     },

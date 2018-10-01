@@ -1,5 +1,6 @@
 import axios from 'axios'
 import config from '../configurations'
+import xid from 'xid-js'
 
 export default class ApplicationService {
 
@@ -51,18 +52,21 @@ export default class ApplicationService {
 
     async getEnvironments(appId) {
         const environments = [{
+            id: xid.next(),
             name: "Development",
             description: "Development/Integration environment configuration",
             configuration: '{\n\t"property" : "foo"\n}',
             format: 'json',
             metadata: {}
         }, {
+            id: xid.next(),
             name: 'QA',
             description: 'QA test environment',
             configuration: 'hello editor',
             format: 'json',
             metadata: {}
         }, {
+            id: xid.next(),
             name: 'Production',
             description: 'Production environment',
             configuration: 'hello editor',

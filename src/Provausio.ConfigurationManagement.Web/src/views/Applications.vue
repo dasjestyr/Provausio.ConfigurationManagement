@@ -38,11 +38,11 @@
                                         label="Name"></v-text-field>
                                 </v-flex>
                                 <v-flex xs12>
-                                    <v-textarea color="secondary"
+                                    <v-text-field color="secondary"
                                         v-model="newApplication.description"
                                         required
                                         hint="What does the application do?"
-                                        label="Description"></v-textarea>
+                                        label="Description"></v-text-field>
                                 </v-flex>
                             </v-layout>
                         </v-container>
