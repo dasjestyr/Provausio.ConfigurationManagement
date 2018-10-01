@@ -20,24 +20,20 @@
 
 <script>
 import CodeEditor from './CodeEditor'
-import AppService from '../services/ApplicationService'
-const appService = new AppService()
 export default {
     props: ['env'],
     data: () => ({
         
     }),
     methods: {
-        async deleteEnvironment(env) {
-            // will need to update redux to have the tab remove itself after deleting on the server
-            await appService.deleteEnvironment(env)
+        async deleteEnvironment(name) {
+            this.$store.dispatch('deleteEnvironment', name)
         },
         async saveEnvironment(envName) {
             if(this.env.metadata.isNew) {
-                await appService.createEnvironment(this.env)
-                // TODO: tell redux to add the tab
+                
             } else {
-                await appService.saveEnvironment(this.env)
+                
             }
         }
     },

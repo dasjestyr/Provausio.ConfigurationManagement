@@ -79,7 +79,7 @@ export default class ApplicationService {
         console.info(`Saved ${env.name}`)
     }
 
-    async deleteEnvironment(env) {
-        console.info(`KABOOM! Deleted ${env}`)
+    async deleteEnvironment(appId, environmentName) {
+        console.info(`KABOOM! Deleted ${environmentName}`)
     }
 }

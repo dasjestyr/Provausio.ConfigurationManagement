@@ -77,7 +77,7 @@ export default {
         }
     },
     async mounted(){        
-        this.$store.dispatch('setApplicationsFromServer')      
+        this.$store.dispatch('getApplicationsFromServer')      
     },
     computed: {
         filteredApplications() {       

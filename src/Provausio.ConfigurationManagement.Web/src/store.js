@@ -5,18 +5,22 @@ import AppService from './services/ApplicationService'
 Vue.use(Vuex)
 
 const appService = new AppService()
+const defaultApp = { activeTab: 0, app: {} }
 
 export default new Vuex.Store({
   state: {
     applications: {},
-    activeApplication: {}
+    activeApplication: defaultApp
   },  
   mutations: {    
     SET_APPLICATIONS: (state, payload) => {
       state.applications = payload
     },
-    SET_ACTIVE_APPLICATION: (state, payload) => {
+    SET_ACTIVE_APPLICATION: (state, payload) => {      
       state.activeApplication = payload
+    },
+    CLEAR_ACTIVE_APPLICATION: (state) => {
+      state.activeApplication = defaultApp
     },
     ADD_APPLICATION: (state, payload) => {
       state.applications.push(payload)
@@ -25,41 +29,43 @@ export default new Vuex.Store({
       state.applications[appId].environments.push(payload)
     },
     SET_ENVIRONMENTS: (state, environments) => {         
-      state.activeApplication.environments = environments
+      state.activeApplication.app.environments = environments
     },
-    DELETE_ENVIRONMENT: (state, appId, environmentName) => {
-      state.applications[appId].environments =
-        state.applications[appId].environments.filter(env => {
-          if(env.name !== environmentName) return env;
+    DELETE_ENVIRONMENT: (state, environmentName) => {
+      state.activeApplication.app.environments =
+        state.activeApplication.app.environments.filter(e => {
+          if(e.name !== environmentName)
+            return e
         })
     }
   },
+
   getters: {
     getApplications: state => {
       // because they're stored as objects instead of arrays
       return Object.keys(state.applications)
         .map(k => state.applications[k] || {})
     },
-    getEnvironments: (state) => {
-      // for some reason the next line is throwing
-      // return Object.keys(state.activeApplication.environments)
-      //   .map(k => {
-      //     if(!k || !state.activeApplication.environments[k]) return
-      //     return state.activeApplication.environments[k]
-      //   })
-      return state.activeApplication.environments
+    getEnvironments: (state) => {     
+      return state.activeApplication.app.environments
     },
     getActiveApplication: state =>  state.activeApplication
   },
+
   actions: {
     setApplications: (context, applications) => {      
       context.commit('SET_APPLICATIONS', applications)
     },
-    setActiveApplication: (context, application) => {
-      context.commit('SET_ACTIVE_APPLICATION', application)      
+    getApplication: async (context, applicationId) => {
+      let application = await appService.getApplication(applicationId)
+      let active = { activeTab: 0, app: application }
+      context.commit('SET_ACTIVE_APPLICATION', active)      
     },
-    setApplicationsFromServer: async (context) => {
-      const applications = await appService.getApplications()    
+    clearApplication: (context) => {
+      context.commit('CLEAR_ACTIVE_APPLICATION')
+    },
+    getApplicationsFromServer: async (context) => {
+      let applications = await appService.getApplications()    
       if(applications) context.commit('SET_APPLICATIONS', applications)
     },
     addApplication: async (context, payload) => {
@@ -70,16 +76,18 @@ export default new Vuex.Store({
       context.commit('ADD_ENVIRONMENT', appId, payload)
     },
     getEnvironments: async (context, staticTabs) => {
-      let appId = context.getters.getActiveApplication.id
-      const environments = await appService.getEnvironments(appId)
+      let appId = context.getters.getActiveApplication.app.id
+      let environments = await appService.getEnvironments(appId)
       
       if(staticTabs)
         environments.push(...staticTabs)
 
       context.commit('SET_ENVIRONMENTS', environments)
     },
-    deleteEnvironment: (context, appId, environmentName) => {
-      context.commit('DELETE_ENVIRONMENT', appId, environmentName)
+    deleteEnvironment: async (context, environmentName) => {
+      let appId = context.getters.getActiveApplication.app.id
+      await appService.deleteEnvironment(appId, environmentName)
+      context.commit('DELETE_ENVIRONMENT', environmentName)
     }
   }
 })
