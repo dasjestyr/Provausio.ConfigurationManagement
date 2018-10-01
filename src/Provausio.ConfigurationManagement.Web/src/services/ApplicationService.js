@@ -43,7 +43,8 @@ export default class ApplicationService {
                 id: response.data.applicationId,
                 name: response.data.name,
                 description: response.data.description,
-                metadata: response.data.metadata
+                metadata: response.data.metadata,
+                environments: []
             }
         }
     }

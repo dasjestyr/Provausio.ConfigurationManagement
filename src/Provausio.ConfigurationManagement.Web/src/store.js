@@ -24,8 +24,8 @@ export default new Vuex.Store({
     ADD_ENVIRONMENT: (state, appId, payload) => {
       state.applications[appId].environments.push(payload)
     },
-    SET_ENVIRONMENTS: (state, args) => {   
-      state.activeApplication.environments = args.environments
+    SET_ENVIRONMENTS: (state, environments) => {         
+      state.activeApplication.environments = environments
     },
     DELETE_ENVIRONMENT: (state, appId, environmentName) => {
       state.applications[appId].environments =
@@ -41,11 +41,13 @@ export default new Vuex.Store({
         .map(k => state.applications[k] || {})
     },
     getEnvironments: (state) => {
-      return Object.keys(state.activeApplication.environments)
-        .map(k => {
-          if(!k || !state.activeApplication.environments[k]) return
-          return state.activeApplication.environments[k]
-        })
+      // for some reason the next line is throwing
+      // return Object.keys(state.activeApplication.environments)
+      //   .map(k => {
+      //     if(!k || !state.activeApplication.environments[k]) return
+      //     return state.activeApplication.environments[k]
+      //   })
+      return state.activeApplication.environments
     },
     getActiveApplication: state =>  state.activeApplication
   },
@@ -54,7 +56,7 @@ export default new Vuex.Store({
       context.commit('SET_APPLICATIONS', applications)
     },
     setActiveApplication: (context, application) => {
-      context.commit('SET_ACTIVE_APPLICATION', application)
+      context.commit('SET_ACTIVE_APPLICATION', application)      
     },
     setApplicationsFromServer: async (context) => {
       const applications = await appService.getApplications()    
@@ -67,16 +69,14 @@ export default new Vuex.Store({
     addEnvironment: (context, appId, payload) => {
       context.commit('ADD_ENVIRONMENT', appId, payload)
     },
-    setEnvironments: async (context, args) => {
-      const environments = await appService.getEnvironments(args.appId)
+    getEnvironments: async (context, staticTabs) => {
+      let appId = context.getters.getActiveApplication.id
+      const environments = await appService.getEnvironments(appId)
       
-      if(args.staticTabs)
-        environments.push(...args.staticTabs)
+      if(staticTabs)
+        environments.push(...staticTabs)
 
-      context.commit('SET_ENVIRONMENTS', {
-        appId: args.appId, 
-        environments: environments
-      })
+      context.commit('SET_ENVIRONMENTS', environments)
     },
     deleteEnvironment: (context, appId, environmentName) => {
       context.commit('DELETE_ENVIRONMENT', appId, environmentName)

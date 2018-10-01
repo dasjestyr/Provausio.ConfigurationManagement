@@ -1,8 +1,8 @@
 <template>
     <v-flex>     
         <v-flex my-2>
-            <v-text-field color="secondary" hint="Application Name" persistent-hint v-model="application.name"></v-text-field>
-            <v-text-field color="secondary" hint="Description of the application" persistent-hint v-model="application.description"></v-text-field>  
+            <v-text-field color="secondary" hint="Application Name" persistent-hint v-model="activeApplication.name"></v-text-field>
+            <v-text-field color="secondary" hint="Description of the application" persistent-hint v-model="activeApplication.description"></v-text-field>  
         </v-flex>      
         
         <h2>Environments</h2>
@@ -30,7 +30,6 @@ import EditEnvironment from '../components/EditEnvironment'
 const appService = new AppService()
 export default {
     data: () => ({
-        application: {},
         newEnvironment: {},
         activeTab: 0
     }),
@@ -41,22 +40,26 @@ export default {
         }
     },
     computed: {
+        activeApplication() {
+            return this.$store.getters.getActiveApplication
+        },
         environments() {          
             return this.$store.getters.getEnvironments                        
         }
     },
     async mounted() {
-        this.application = await appService.getApplication(this.$route.params.id)   
+                
         const newEnvironmentTab = [{
+            id: 'newtab',
             name: "+ New",
             format: 'javascript',
             configuration: '// add configuration here',
             metadata: { isNew: true }
         }]
-        await this.$store.dispatch('setActiveApplication', this.application)
-        await this.$store.dispatch('setEnvironments', {
-                    appId: this.$route.params.id, 
-                    staticTabs: newEnvironmentTab})
+
+        let application = await appService.getApplication(this.$route.params.id)   
+        await this.$store.dispatch('setActiveApplication', application)
+        await this.$store.dispatch('getEnvironments', newEnvironmentTab)
         
         this.activeTab = 0
     },
