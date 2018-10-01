@@ -33,7 +33,9 @@
         </v-layout>
       </v-container>
     </v-content>
-
+    <v-snackbar v-model="showToast" color="accent" top>
+      {{ toastMessage.message }}
+    </v-snackbar>
     <v-footer app fixed>
       <span>&copy; 2017 Provausio</span>
     </v-footer>
@@ -44,6 +46,7 @@
   export default {
     data: () => ({
       drawer: true,
+      showToast: false,
       areas: [{
         name: 'Applications',
         path: '/applications',
@@ -60,6 +63,19 @@
     }),
     props: {
       source: String
+    },
+    computed: {
+      toastMessage() {
+        return this.$store.state.toastMessage
+      }
+    },
+    watch: {
+      toastMessage() {
+        this.showToast = true
+      }
+    },
+    created() {
+      this.$store.commit('SHOW_TOAST', 'hello world')
     }
   }
 </script>

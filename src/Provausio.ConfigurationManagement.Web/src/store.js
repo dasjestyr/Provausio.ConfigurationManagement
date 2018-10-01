@@ -21,7 +21,12 @@ function getNewTab() {
 export default new Vuex.Store({
   state: {
     applications: {},
-    activeApplication: defaultApp
+    activeApplication: defaultApp,
+    activeModals: {},
+    toastMessage: {
+      message: '',
+      timestamp: 0
+    }
   },  
   mutations: {    
     SET_APPLICATIONS: (state, payload) => {
@@ -49,10 +54,23 @@ export default new Vuex.Store({
     },
     ACTIVATE_TAB: (state, tab) => {
       state.activeApplication.activeTab = tab
+    },
+    SHOW_MODAL: (state, id) => {
+      Vue.set(state.activeModals, id, true)            
+    },
+    HIDE_MODAL: (state, id) => {
+      Vue.set(state.activeModals, id, false)
+    },
+    SHOW_TOAST: (state, message) => {
+      Vue.set(state, 'toastMessage', {
+        message: message,
+        timestamp: Date.now()
+      })
     }
   },
 
   getters: {
+    showModal: state => id => state.activeModals[id],    
     getApplications: state => {
       // because they're stored as objects instead of arrays
       return Object.keys(state.applications)

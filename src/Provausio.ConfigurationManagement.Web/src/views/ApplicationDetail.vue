@@ -13,6 +13,19 @@
                 persistent-hint 
                 v-model="activeApplication.app.description"
                 ></v-text-field>  
+            <v-layout mt-2 align-end justify-end>
+                <v-spacer></v-spacer>
+                <v-btn round right color="error" @click="confirmAppDelete">Delete Application</v-btn>                
+            </v-layout>
+
+            <dangerous header="Delete Application" 
+                :confirmCallback="deleteApp"
+                oktext="Confirm Delete" 
+                canceltext="Cancel" 
+                :id="deleteAppModalId">
+                Are you sure you want to delete {{ activeApplication.app.name }}? 
+                This will also delete all associated environments and cannot be undone!
+            </dangerous>
         </v-flex>      
         
         <h2>Environments</h2>
@@ -37,10 +50,26 @@
 <script>
 
 import EditEnvironment from '../components/EditEnvironment'
+import ConfirmDangerous from '../components/ConfirmDangerous'
 
 export default {
+    data: () => ({
+        deleteAppModalId: 'delete-app'
+    }),
     components: {
-        'editor': EditEnvironment
+        'editor': EditEnvironment,
+        'dangerous': ConfirmDangerous
+    },
+    methods: {
+        confirmAppDelete() {            
+            this.$store.commit('SHOW_MODAL', this.deleteAppModalId)   
+        },
+        deleteApp() {
+            this.$store.commit('HIDE_MODAL', this.deleteAppModalId)
+            // TODO delete from store
+            this.$store.commit('SHOW_TOAST', `Deleted ${this.activeApplication.app.name}!`)
+            this.$router.push('/applications')            
+        }
     },
     computed: {
         activeApplication() {
@@ -58,10 +87,9 @@ export default {
             }
         }
     },
-    async mounted() {
-        
+    async mounted() {        
         await this.$store.dispatch('getApplication', this.$route.params.id)
-        await this.$store.dispatch('getEnvironments')        
+        await this.$store.dispatch('getEnvironments')             
 
         this.loading = false        
         this.activeTab = 1

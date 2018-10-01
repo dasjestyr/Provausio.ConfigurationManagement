@@ -6,7 +6,7 @@
                     color="secondary" 
                     hint="Environment name" 
                     persistent-hint
-                    @change="dirty(env.id)"
+                    @keypress="dirty(env.id)"
                     v-model="env.name"></v-text-field>
             </v-flex>
             <v-flex>
@@ -48,11 +48,13 @@ export default {
             }
         },
         async deleteEnvironment(name) {
-            this.$store.dispatch('deleteEnvironment', name)
+            await this.$store.dispatch('deleteEnvironment', name)
+            this.$store.commit('SHOW_TOAST', `Deleted ${name} environment.`)
         },
-        async saveEnvironment(envName) {
+        async saveEnvironment(name) {
             if(this.env.metadata.isNew) {
-                this.$store.dispatch('addEnvironment', this.env)
+                await this.$store.dispatch('addEnvironment', this.env)
+                this.$store.commit('SHOW_TOST', `Saved ${name} environment.`)
             } else {
                 
             }
@@ -60,8 +62,10 @@ export default {
     },
     watch: {
         environmentName() {
-            if(this.hasCreated && this.env.name === '')
+            if(this.hasCreated && this.env.name === '') {
                 this.$store.dispatch('deleteEnvironment', this.env.id)
+                this.$store.commit('SHOW_TOAST', `Cancelled new environment`)
+            }                
         }
     },
     computed: {
