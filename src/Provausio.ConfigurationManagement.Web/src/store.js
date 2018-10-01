@@ -14,7 +14,7 @@ function getNewTab() {
       name: '+ Add',
       format: 'javascript',
       configuration: '// add configuration here',
-      metadata: { isNew: true, canEditName: true }
+      metadata: { isNew: true }
   }
 }
 
@@ -37,18 +37,18 @@ export default new Vuex.Store({
       state.applications[payload.id] = payload
     },
     ADD_ENVIRONMENT: (state, payload) => {
-      state.activeApplication.app.environments.splice(0, 0, payload)
+      state.activeApplication.app.environments.push(payload)
     },
     SET_ENVIRONMENTS: (state, environments) => {         
       state.activeApplication.app.environments = environments
     },
-    DELETE_ENVIRONMENT: (state, environmentName) => {
-      state.activeApplication.app.environments =
-        state.activeApplication.app.environments.filter(e => {
-          if(e.name !== environmentName)
-            return e
-        })
-        state.activeApplication.activeTab = 0
+    DELETE_ENVIRONMENT: (state) => {
+      state.activeApplication.app.environments
+        .splice(state.activeApplication.activeTab, 1)
+      state.activeApplication.activeTab = 0
+    },
+    ACTIVATE_TAB: (state, tab) => {
+      state.activeApplication.activeTab = tab
     }
   },
 
@@ -61,7 +61,19 @@ export default new Vuex.Store({
     getEnvironments: (state) => {     
       return state.activeApplication.app.environments
     },
-    getActiveApplication: state =>  state.activeApplication
+    getActiveApplication: state =>  state.activeApplication,
+    getEnvironmentIsNew: state => {
+      return state.activeApplication.app
+        && state.activeApplication.app.environments
+        && state.activeApplication.app.environments[state.activeApplication.activeTab]
+        && state.activeApplication.app.environments[state.activeApplication.activeTab].metadata
+        && state.activeApplication.app.environments[state.activeApplication.activeTab].metadata.isNew
+    },
+    getActiveEnvironment: state => {
+      return state.activeApplication.app
+        && state.activeApplication.app.environments
+        && state.activeApplication.app.environments[state.activeApplication.activeTab]
+    }
   },
 
   actions: {
@@ -99,10 +111,10 @@ export default new Vuex.Store({
 
       context.commit('SET_ENVIRONMENTS', environments)
     },
-    deleteEnvironment: async (context, environmentName) => {
+    deleteEnvironment: async (context, id) => {
       let appId = context.getters.getActiveApplication.app.id
-      await appService.deleteEnvironment(appId, environmentName)
-      context.commit('DELETE_ENVIRONMENT', environmentName)
+      await appService.deleteEnvironment(appId, id)
+      context.commit('DELETE_ENVIRONMENT')
     }
   }
 })

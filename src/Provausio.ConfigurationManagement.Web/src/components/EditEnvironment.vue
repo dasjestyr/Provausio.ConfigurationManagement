@@ -6,8 +6,8 @@
                     color="secondary" 
                     hint="Environment name" 
                     persistent-hint
-                    v-model="env.name"
-                    v-bind:disabled="!env.metadata.canEditName"></v-text-field>
+                    @change="dirty(env.id)"
+                    v-model="env.name"></v-text-field>
             </v-flex>
             <v-flex>
                 <v-text-field 
@@ -31,16 +31,22 @@
 import CodeEditor from './CodeEditor'
 import xid from 'xid-js'
 
-
-
-
-
 export default {
     props: ['env'],
     data: () => ({
-        
+        hasCreated: false
     }),
     methods: {
+        async dirty(id) {
+            if(!this.env.metadata.isNew) return;
+
+            if(this.hasCreated && this.env.name === ''){
+                console.log(`deleted ${id}`)
+            } else if(!this.hasCreated) {                
+                await this.$store.dispatch('addingEnvironment')
+                this.hasCreated = true
+            }
+        },
         async deleteEnvironment(name) {
             this.$store.dispatch('deleteEnvironment', name)
         },
@@ -50,6 +56,17 @@ export default {
             } else {
                 
             }
+        }
+    },
+    watch: {
+        environmentName() {
+            if(this.hasCreated && this.env.name === '')
+                this.$store.dispatch('deleteEnvironment', this.env.id)
+        }
+    },
+    computed: {
+        environmentName() {
+            return this.env.name
         }
     },
     components: {
