@@ -59,33 +59,30 @@
 </template>
 
 <script>
-import AppService from '../services/ApplicationService.js'
-const appService = new AppService()
 export default {
     name: 'applications',
     data: () => ({
         newAppDialog: false,
         newApplication: { name: '', description: ''},
-        searchTerm: "",
-        applications: []
+        searchTerm: ""
     }),
     methods: {        
         async createNew() {
-            this.newAppDialog = false
-            let newId = await appService.createApplication(this.newApplication)
-            this.$router.push(`applications/${newId}`)
+            this.newAppDialog = false            
+            await this.$store.dispatch('addApplication', this.newApplication)
+            this.$router.push(`applications/${this.newApplication.id}`)
         },
         goToApp(id) {
             this.$router.push(`applications/${id}`)
         }
     },
     async mounted(){        
-        this.applications = await appService.getApplications()        
+        this.$store.dispatch('setApplicationsFromServer')      
     },
     computed: {
-        filteredApplications() {
-            let vm = this
-            return vm.applications.filter(item => {
+        filteredApplications() {       
+            let vm = this     
+            return vm.$store.getters.getApplications.filter(item => {
                     if(!vm.searchTerm) return item;
                     return item.name.toLowerCase().indexOf(vm.searchTerm.toLowerCase()) !== -1
                 })

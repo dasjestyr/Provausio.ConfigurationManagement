@@ -12,15 +12,18 @@ export default class ApplicationService {
 
     async getApplications() {
         let response = await this.client.get('/')
-        if(response.status == 200)
-            return response.data.map(app => {
-                return {
+        if(response.status == 200){
+            let applications = {}
+            response.data.forEach(app => {
+                applications[app.applicationId] = {
                     id: app.applicationId,
                     name: app.name,
                     description: app.description,
                     metadata: app.metadata
                 }
             })
+            return applications
+        }
 
         console.error(response.status)
     }
@@ -46,7 +49,7 @@ export default class ApplicationService {
     }
 
     async getEnvironments(appId) {
-        return [{
+        const environments = [{
             name: "Development",
             description: "Development/Integration environment configuration",
             configuration: '{\n\t"property" : "foo"\n}',
@@ -65,6 +68,7 @@ export default class ApplicationService {
             format: 'json',
             metadata: {}
         }]
+        return environments
     }
     async createEnvironment(env) {
         console.info(`Created new environment ${env.name}`)

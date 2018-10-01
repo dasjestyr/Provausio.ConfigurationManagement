@@ -41,9 +41,6 @@ export default {
             }
         }
     },
-    mounted() {
-
-    },
     components: {
         'code-editor': CodeEditor
     }
