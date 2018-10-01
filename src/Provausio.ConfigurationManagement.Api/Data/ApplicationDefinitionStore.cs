@@ -135,6 +135,7 @@
         {
             var environment = new Environment
             {
+                EnvironmentId = info.Id,
                 Name = info.Name,
                 Description = info.Description,
                 RequiredPermission = info.RequiredPermission,
