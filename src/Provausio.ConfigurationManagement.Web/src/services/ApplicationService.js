@@ -7,7 +7,11 @@ export default class ApplicationService {
     constructor() {        
         this.client = axios.create({
             baseURL: `${config.apiUrl}/applications`,
-            headers: { 'Content-Type': 'application/json'}
+            headers: { 'Content-Type': 'application/json'},
+            validateStatus: function(status) {
+                // will still get a client error in log anyway. This will at least make sure there aren't 2 errors
+                return status < 1000 
+            }
         })            
     }
 
@@ -50,33 +54,45 @@ export default class ApplicationService {
         }
     }
 
+    async deleteApplication(id) {
+        await this.client.delete(`/${id}`)        
+    }
+
     async getEnvironments(appId) {
-        const environments = [{
-            id: xid.next(),
-            name: "Development",
-            description: "Development/Integration environment configuration",
-            configuration: '{\n\t"property" : "foo"\n}',
-            format: 'json',
-            metadata: {}
-        }, {
-            id: xid.next(),
-            name: 'QA',
-            description: 'QA test environment',
-            configuration: 'hello editor',
-            format: 'json',
-            metadata: {}
-        }, {
-            id: xid.next(),
-            name: 'Production',
-            description: 'Production environment',
-            configuration: 'hello editor',
-            format: 'json',
-            metadata: {}
-        }]
+        let response = await this.client.get(`/${appId}/environments`)
+        let environments = []
+        if(response.status == 200){
+            response.data.forEach(env => {
+                environments.push({
+                    id: env.environmentId,
+                    name: env.name,
+                    description: env.description,
+                    configuration: '',
+                    format: '',
+                    metadata: env.metadata
+                })
+            })
+        } 
         return environments
     }
-    async createEnvironment(env) {
-        console.info(`Created new environment ${env.name}`)
+    async createEnvironment(appId, env) {
+        delete env.metadata.isNew
+        let response = await this.client.post(`/${appId}/environments`, {
+            id: env.id,
+            name: env.name,
+            description: env.description,
+            configuration: {
+                content: env.configuration.content,
+                format: env.configuration.format,
+                metadata: env.configuration.metadata
+            },
+            metadata: env.metadata
+        })
+        
+        if(response.status == 201) {
+            console.log(`The new environment id is ${response.data.id}`)
+            return response.data.id
+        } else return null
     }
 
     async saveEnvironment(env) {

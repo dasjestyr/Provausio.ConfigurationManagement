@@ -12,8 +12,11 @@ function getNewTab() {
   return {
       id: xid.next(),
       name: '+ Add',
-      format: 'javascript',
-      configuration: '// add configuration here',
+      configuration: {
+        content: '// add configuration here',
+        format: 'javascript',
+        metadata: {}
+      },
       metadata: { isNew: true }
   }
 }
@@ -41,11 +44,20 @@ export default new Vuex.Store({
     ADD_APPLICATION: (state, payload) => {
       state.applications[payload.id] = payload
     },
+    DELETE_APPLICATION: (state, id) => {
+      delete state.applications[id]
+    },
     ADD_ENVIRONMENT: (state, payload) => {
       state.activeApplication.app.environments.push(payload)
     },
     SET_ENVIRONMENTS: (state, environments) => {         
       state.activeApplication.app.environments = environments
+    },
+    SET_ENVIRONMENT_ID: (state, id) => {
+      let currentEnvironment = 
+        state.activeApplication.app.environments[state.activeApplication.activeTab];
+
+        Vue.set(currentEnvironment, 'id', id)
     },
     DELETE_ENVIRONMENT: (state) => {
       state.activeApplication.app.environments
@@ -114,19 +126,23 @@ export default new Vuex.Store({
       payload.id = await appService.createApplication(payload)
       context.commit('ADD_APPLICATION', payload)
     },
+    deleteApplication: async (context, id) => {
+      await appService.deleteApplication(id)
+      context.commit('DELETE_APPLICATION', id)
+    },
     addingEnvironment: (context) => {
       context.commit('ADD_ENVIRONMENT', getNewTab())
     },
-    addEnvironment: (context, payload) => {
-      // TODO: save to server
-      context.commit('ADD_ENVIRONMENT', payload)
+    createEnvironment: async (context, payload) => {
+      let appId = context.getters.getActiveApplication.app.id
+      let environmentId = await appService.createEnvironment(appId, payload)
+      if(!environments) return
+      context.commit('SET_ENVIRONMENT_ID', environmentId)
     },
     getEnvironments: async (context) => {
       let appId = context.getters.getActiveApplication.app.id
-      let environments = await appService.getEnvironments(appId)
-      
+      let environments = await appService.getEnvironments(appId)      
       environments.push(getNewTab())
-
       context.commit('SET_ENVIRONMENTS', environments)
     },
     deleteEnvironment: async (context, id) => {

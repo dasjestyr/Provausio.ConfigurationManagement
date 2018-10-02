@@ -73,9 +73,6 @@
       toastMessage() {
         this.showToast = true
       }
-    },
-    created() {
-      this.$store.commit('SHOW_TOAST', 'hello world')
     }
   }
 </script>

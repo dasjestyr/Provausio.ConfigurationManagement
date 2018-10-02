@@ -6,6 +6,8 @@ namespace Provausio.ConfigurationManagement.Api.Model
     {
         public string Content { get; set; }
 
+        public string Format { get; set; }
+
         public Dictionary<string, string> Metadata { get; set; }
     }
 }

@@ -64,9 +64,9 @@ export default {
         confirmAppDelete() {            
             this.$store.commit('SHOW_MODAL', this.deleteAppModalId)   
         },
-        deleteApp() {
+        async deleteApp() {
             this.$store.commit('HIDE_MODAL', this.deleteAppModalId)
-            // TODO delete from store
+            await this.$store.dispatch('deleteApplication', this.activeApplication.app.id)
             this.$store.commit('SHOW_TOAST', `Deleted ${this.activeApplication.app.name}!`)
             this.$router.push('/applications')            
         }

@@ -10,6 +10,8 @@ namespace Provausio.ConfigurationManagement.Api.Model
 
         public string Description { get; set; }
 
+        public ConfigurationInfo Configuration { get; set; }
+
         public string RequiredPermission { get; set; }
 
         public Dictionary<string, string> Metadata { get; set; }

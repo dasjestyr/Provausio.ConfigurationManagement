@@ -18,7 +18,7 @@
             </v-flex>                
         </v-layout>
         <v-flex pa-4>
-            <code-editor :editor-id="env.name + '-editor'" :lang="env.format" :content="env.configuration"></code-editor>
+            <code-editor :editor-id="env.name + '-editor'" :lang="env.configuration.format" :content="env.configuration.content"></code-editor>
             <v-flex mt-2>
                 <v-btn round v-if="!env.metadata.isNew" color="error" @click="deleteEnvironment(env.name)">Delete {{ env.name }}</v-btn>
                 <v-btn round color="success" @click="saveEnvironment(env.name)">Save {{ env.name }}</v-btn>
@@ -53,8 +53,8 @@ export default {
         },
         async saveEnvironment(name) {
             if(this.env.metadata.isNew) {
-                await this.$store.dispatch('addEnvironment', this.env)
-                this.$store.commit('SHOW_TOST', `Saved ${name} environment.`)
+                await this.$store.dispatch('createEnvironment', this.env)
+                this.$store.commit('SHOW_TOAST', `Saved ${name} environment.`)
             } else {
                 
             }
