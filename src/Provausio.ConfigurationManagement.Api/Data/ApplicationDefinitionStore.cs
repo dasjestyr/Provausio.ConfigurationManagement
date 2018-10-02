@@ -138,6 +138,9 @@
                 EnvironmentId = info.Id,
                 Name = info.Name,
                 Description = info.Description,
+                Configuration = info.Configuration != null
+                    ? MapConfiguration(info.Configuration)
+                    : null,
                 RequiredPermission = info.RequiredPermission,
                 Metadata = info.Metadata
             };
@@ -150,6 +153,9 @@
             {
                 Name = definition.Name,
                 Description = definition.Description,
+                Configuration = definition.Configuration != null 
+                    ? MapConfigurationInfo(definition.Configuration)
+                    : null,
                 RequiredPermission = definition.RequiredPermission,
                 Metadata = definition.Metadata
             };
@@ -160,6 +166,7 @@
             return new Configuration
             {
                 Content = info.Content,
+                Format = info.Format,
                 Metadata = info.Metadata
             };
         }
@@ -168,6 +175,7 @@
         {
             return new ConfigurationInfo
             {
+                Format = definition.Format,
                 Content = definition.Content,
                 Metadata = definition.Metadata
             };

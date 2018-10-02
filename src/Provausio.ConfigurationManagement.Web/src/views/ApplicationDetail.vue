@@ -72,6 +72,9 @@ export default {
         }
     },
     computed: {
+        env() {
+            return this.$store.getters.getActiveEnvironment
+        },
         activeApplication() {
             return this.$store.getters.getActiveApplication
         },

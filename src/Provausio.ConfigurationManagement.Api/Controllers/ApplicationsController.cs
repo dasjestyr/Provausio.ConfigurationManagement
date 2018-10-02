@@ -104,7 +104,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// <param name="payload"></param>
         /// <returns></returns>
         [HttpPost, Route("{applicationId}/environments")]
-        public async Task<IActionResult> AddEnvironment(string applicationId, [FromBody] EnvironmentInfo payload)
+        public async Task<IActionResult> CreateEnvironment(string applicationId, [FromBody] EnvironmentInfo payload)
         {
             payload.Id = Xid.NewXid().ToString();
             await _definitionStore.CreateEnvironment(applicationId, payload.Id, payload).ConfigureAwait(false);

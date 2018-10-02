@@ -50,8 +50,8 @@ export default new Vuex.Store({
     ADD_ENVIRONMENT: (state, payload) => {
       state.activeApplication.app.environments.push(payload)
     },
-    SET_ENVIRONMENTS: (state, environments) => {         
-      state.activeApplication.app.environments = environments
+    SET_ENVIRONMENTS: (state, environments) => {  
+      Vue.set(state.activeApplication.app, 'environments', environments)     
     },
     SET_ENVIRONMENT_ID: (state, id) => {
       let currentEnvironment = 
@@ -63,6 +63,12 @@ export default new Vuex.Store({
       state.activeApplication.app.environments
         .splice(state.activeApplication.activeTab, 1)
       state.activeApplication.activeTab = 0
+    },
+    SET_ENVIRONMENT_CONFIG: (state, payload) => {
+      let currentEnvironment = 
+        state.activeApplication.app.environments[state.activeApplication.activeTab];
+        Vue.set(currentEnvironment, 'configuration', payload)
+        console.log(payload)
     },
     ACTIVATE_TAB: (state, tab) => {
       state.activeApplication.activeTab = tab
@@ -136,7 +142,7 @@ export default new Vuex.Store({
     createEnvironment: async (context, payload) => {
       let appId = context.getters.getActiveApplication.app.id
       let environmentId = await appService.createEnvironment(appId, payload)
-      if(!environments) return
+      if(!environmentId) return
       context.commit('SET_ENVIRONMENT_ID', environmentId)
     },
     getEnvironments: async (context) => {

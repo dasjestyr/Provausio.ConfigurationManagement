@@ -62,13 +62,17 @@ export default class ApplicationService {
         let response = await this.client.get(`/${appId}/environments`)
         let environments = []
         if(response.status == 200){
+            console.log(response.data)
             response.data.forEach(env => {
                 environments.push({
                     id: env.environmentId,
                     name: env.name,
                     description: env.description,
-                    configuration: '',
-                    format: '',
+                    configuration: {
+                        content: env.configuration.content,
+                        format: env.configuration.format,
+                        metadata: env.configuration.metadata
+                    },
                     metadata: env.metadata
                 })
             })

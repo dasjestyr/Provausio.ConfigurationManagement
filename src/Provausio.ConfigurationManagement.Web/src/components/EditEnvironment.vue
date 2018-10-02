@@ -18,7 +18,11 @@
             </v-flex>                
         </v-layout>
         <v-flex pa-4>
-            <code-editor :editor-id="env.name + '-editor'" :lang="env.configuration.format" :content="env.configuration.content"></code-editor>
+            <code-editor 
+                :editor-id="env.name + '-editor'" 
+                :lang="env.configuration.format" 
+                :content="env.configuration.content">
+            </code-editor>
             <v-flex mt-2>
                 <v-btn round v-if="!env.metadata.isNew" color="error" @click="deleteEnvironment(env.name)">Delete {{ env.name }}</v-btn>
                 <v-btn round color="success" @click="saveEnvironment(env.name)">Save {{ env.name }}</v-btn>
@@ -30,8 +34,12 @@
 <script>
 import CodeEditor from './CodeEditor'
 import xid from 'xid-js'
+import { EventBus } from '@/eventbus.js'
 
 export default {
+    components: {
+        'code-editor': CodeEditor
+    },
     props: ['env'],
     data: () => ({
         hasCreated: false
@@ -52,6 +60,7 @@ export default {
             this.$store.commit('SHOW_TOAST', `Deleted ${name} environment.`)
         },
         async saveEnvironment(name) {
+            EventBus.$emit('update-editor-from') // workaround for ace not being reactive
             if(this.env.metadata.isNew) {
                 await this.$store.dispatch('createEnvironment', this.env)
                 this.$store.commit('SHOW_TOAST', `Saved ${name} environment.`)
@@ -72,10 +81,7 @@ export default {
         environmentName() {
             return this.env.name
         }
-    },
-    components: {
-        'code-editor': CodeEditor
-    }    
+    }   
 }
 
 </script>
