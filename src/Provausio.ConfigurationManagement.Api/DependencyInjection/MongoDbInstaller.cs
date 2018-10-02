@@ -13,7 +13,8 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
         {
             services.AddSingleton(p => 
             {
-                var connectionString = configuration["MongoDb:ConnectionString"];
+                //var connectionString = configuration["MongoDb:ConnectionString"];
+                var connectionString = Environment.GetEnvironmentVariable("MONGODB_CONN");
                 Console.Out.WriteLine($"Using connection string {connectionString}");
                 var client = new MongoClient(connectionString);
 
