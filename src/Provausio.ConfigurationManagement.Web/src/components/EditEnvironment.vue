@@ -19,9 +19,7 @@
         </v-layout>
         <v-flex pa-4>
             <code-editor 
-                :editor-id="env.name + '-editor'" 
-                :lang="env.configuration.format" 
-                :content="env.configuration.content">
+                :content="$store.getters.getActiveEnvironment.configuration.content">
             </code-editor>
             <v-flex mt-2>
                 <v-btn round v-if="!env.metadata.isNew" color="error" @click="deleteEnvironment(env.name)">Delete {{ env.name }}</v-btn>
@@ -32,17 +30,17 @@
 </template>
 
 <script>
-import CodeEditor from './CodeEditor'
+import CodeEditor2 from './CodeEditor2'
 import xid from 'xid-js'
 import { EventBus } from '@/eventbus.js'
 
 export default {
     components: {
-        'code-editor': CodeEditor
+        'code-editor': CodeEditor2
     },
     props: ['env'],
     data: () => ({
-        hasCreated: false
+        hasCreated: false,        
     }),
     methods: {
         async dirty(id) {

@@ -51,6 +51,7 @@
 
 import EditEnvironment from '../components/EditEnvironment'
 import ConfirmDangerous from '../components/ConfirmDangerous'
+import CodeEditor2 from '../components/CodeEditor2'
 
 export default {
     data: () => ({

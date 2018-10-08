@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import AppService from './services/ApplicationService'
+import AppService from '../services/ApplicationService'
 import xid from 'xid-js'
 
 Vue.use(Vuex)
@@ -68,7 +68,11 @@ export default new Vuex.Store({
       let currentEnvironment = 
         state.activeApplication.app.environments[state.activeApplication.activeTab];
         Vue.set(currentEnvironment, 'configuration', payload)
-        console.log(payload)
+    },
+    SET_ENVIRONMENT_CONFIGLANG: (state, payload) => {
+      let currentEnvironmentConfig = 
+        state.activeApplication.app.environments[state.activeApplication.activeTab].configuration;
+      Vue.set(currentEnvironmentConfig, 'format', payload)
     },
     ACTIVATE_TAB: (state, tab) => {
       state.activeApplication.activeTab = tab
@@ -125,7 +129,7 @@ export default new Vuex.Store({
       context.commit('CLEAR_ACTIVE_APPLICATION')
     },
     getApplicationsFromServer: async (context) => {
-      let applications = await appService.getApplications()    
+      let applications = await appService.getApplications()        
       if(applications) context.commit('SET_APPLICATIONS', applications)
     },
     addApplication: async (context, payload) => {
