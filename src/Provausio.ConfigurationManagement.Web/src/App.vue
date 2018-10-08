@@ -34,7 +34,7 @@
       </v-container>
     </v-content>
     <v-snackbar v-model="showToast" color="accent" top>
-      {{ toastMessage.message }}
+      {{ $store.state.ui.toastMessage.message }}
     </v-snackbar>
     <v-footer app fixed>
       <span>&copy; 2017 Provausio</span>

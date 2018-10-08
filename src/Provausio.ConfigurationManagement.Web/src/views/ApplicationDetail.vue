@@ -5,13 +5,13 @@
                 color="secondary" 
                 hint="Application Name" 
                 persistent-hint 
-                v-model="activeApplication.app.name"
+                v-model="application.name"
                 ></v-text-field>
             <v-text-field 
                 color="secondary" 
                 hint="Description of the application" 
                 persistent-hint 
-                v-model="activeApplication.app.description"
+                v-model="application.description"
                 ></v-text-field>  
             <v-layout mt-2 align-end justify-end>
                 <v-spacer></v-spacer>
@@ -23,7 +23,7 @@
                 oktext="Confirm Delete" 
                 canceltext="Cancel" 
                 :id="deleteAppModalId">
-                Are you sure you want to delete {{ activeApplication.app.name }}? 
+                Are you sure you want to delete {{ application.name }}? 
                 This will also delete all associated environments and cannot be undone!
             </dangerous>
         </v-flex>      
@@ -52,6 +52,7 @@
 import EditEnvironment from '../components/EditEnvironment'
 import ConfirmDangerous from '../components/ConfirmDangerous'
 import CodeEditor2 from '../components/CodeEditor2'
+import { mapGetters, mapState, mapMutations } from 'vuex';
 
 export default {
     data: () => ({
@@ -62,45 +63,41 @@ export default {
         'dangerous': ConfirmDangerous
     },
     methods: {
+        ...mapMutations('application', {
+            clearApplication: 'CLEAR_ACTIVE_APPLICATION'
+        }),
         confirmAppDelete() {            
-            this.$store.commit('SHOW_MODAL', this.deleteAppModalId)   
+            this.$store.commit('ui/SHOW_MODAL', this.deleteAppModalId)   
         },
         async deleteApp() {
-            this.$store.commit('HIDE_MODAL', this.deleteAppModalId)
+            this.$store.commit('ui/HIDE_MODAL', this.deleteAppModalId)
             await this.$store.dispatch('deleteApplication', this.activeApplication.app.id)
-            this.$store.commit('SHOW_TOAST', `Deleted ${this.activeApplication.app.name}!`)
+            this.$store.commit('ui/SHOW_TOAST', `Deleted ${this.activeApplication.app.name}!`)
             this.$router.push('/applications')            
         }
     },
     computed: {
-        env() {
-            return this.$store.getters.getActiveEnvironment
-        },
-        activeApplication() {
-            return this.$store.getters.getActiveApplication
-        },
-        environments() {                   
-            return this.$store.getters.getEnvironments                        
-        },
+        ...mapState('application', {
+            env: 'activeEnvironment',
+            application: 'current',
+            environments: 'environments'
+        }),
         activeTab : {
             get() {
-                this.$store.getters.getActiveApplication.activeTab
+                this.$store.getters['application/activeTab']
             },
             set(value) {
-                this.$store.commit('ACTIVATE_TAB', value)
+                this.$store.commit('application/SET_ACTIVE_ENVIRONMENT', value)
             }
         }
     },
-    async mounted() {        
-        await this.$store.dispatch('getApplication', this.$route.params.id)
-        await this.$store.dispatch('getEnvironments')             
-
-        this.loading = false        
-        this.activeTab = 1
+    async created() {        
+        await this.$store.dispatch('application/getApplication', this.$route.params.id)
+        await this.$store.dispatch('application/getEnvironments')
     },
     async beforeDestroy() {
         // this prevents the stale data flip-over blip when switching between apps
-        await this.$store.dispatch('clearApplication')
+        await this.clearApplication()
     }
 }
 </script>

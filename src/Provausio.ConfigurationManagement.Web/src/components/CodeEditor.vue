@@ -29,7 +29,7 @@ export default {
         }
     },
     watch: {
-        selectedLanguage() {
+        selectedLanguage() {            
             this.editor.getSession().setMode(`ace/mode/${this.selectedLanguage}`)
             this.syncFromEditor()
         }

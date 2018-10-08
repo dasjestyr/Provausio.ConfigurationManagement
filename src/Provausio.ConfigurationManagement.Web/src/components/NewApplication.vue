@@ -36,16 +36,17 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex'
 export default {
     props: ['id', 'confirmCallback', 'model'],
     methods: {
         cancel() {
-            this.$store.commit('HIDE_MODAL', this.id)
+            this.$store.commit('ui/HIDE_MODAL', this.id)
         }
     },
     computed: {
         show() {
-            return this.$store.getters.showModal(this.id)
+            return this.$store.getters['ui/showModal'](this.id)
         }
     }
 }

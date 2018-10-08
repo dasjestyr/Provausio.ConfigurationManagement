@@ -33,6 +33,7 @@
 
 <script>
 import NewApp from '@/components/NewApplication'
+import { mapActions } from 'vuex';
 
 export default {
     name: 'applications',
@@ -45,14 +46,14 @@ export default {
         newApplication: { name: '', description: ''},
         searchTerm: ""
     }),
-    methods: {        
+    methods: {     
+        ...mapActions(['createApplication']),   
         confirmNewApp() {
-            this.$store.commit('SHOW_MODAL', this.newAppModalId)
+            this.$store.commit('ui/SHOW_MODAL', this.newAppModalId)
         },
         async createNew() {
-            await this.$store.commit('HIDE_MODAL', this.newAppModalId)
-            await this.$store.dispatch('addApplication', this.newApplication)
-            this.$store.commit('SHOW_TOAST', `Created ${this.newApplication.name}`)
+            await this.$store.commit('ui/HIDE_MODAL', this.newAppModalId)
+            await this.createApplication(this.newApplication)
             this.$router.push(`applications/${this.newApplication.id}`)
         },
         goToApp(id) {
@@ -60,7 +61,7 @@ export default {
         }
     },
     async mounted(){        
-        await this.$store.dispatch('getApplicationsFromServer')      
+        await this.$store.dispatch('getApplications')      
         this.loading = false
     },
     computed: {
