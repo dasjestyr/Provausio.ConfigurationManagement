@@ -1,4 +1,5 @@
 import AppService from '@/services/ApplicationService'
+import xid from 'xid-js'
 import Vue from 'vue'
 
 const appService = new AppService()
@@ -26,6 +27,9 @@ export default {
     },
 
     getters: {
+        activeTab(state) {
+            return state.activeTab
+        },
         getEnvironmentIsNew(state) {
             return state.activeEnvironment 
                 && state.activeEnvironment.metadata
@@ -48,30 +52,41 @@ export default {
         },
         SET_ENVIRONMENTS(state, payload) {
             state.environments = payload
+            state.activeEnvironment = state.environments[0]
             state.activeTab = 0
         },
         ADD_ENVIRONMENT(state, payload) {
             state.environments.push(payload)            
         },
-        DELETE_ENVIRONMENT(state, environmentId) {
+        COMMIT_NEW_ENVIRONMENT(state, env) {
+            console.log(env)
+            Vue.set(state.activeEnvironment, 'activeEnvironment', env)    
+            Vue.set(state.activeEnvironment, 'name', env.name)        
+        },
+        async DELETE_ENVIRONMENT(state, environmentId) {
             let remainingEnvironments = state.environments.filter(env => {
                 if(env.id !== environmentId) return env
             })
-            state.environments = remainingEnvironments
+            state.environments = remainingEnvironments            
         },
         SET_ACTIVE_ENVIRONMENT(state, tabIndex) {
             state.activeTab = tabIndex
             state.activeEnvironment = state.environments[tabIndex]
         },    
+        SET_ENVIRONMENT_NAME(state, name){
+            state.activeEnvironment.name = name
+        },
+        SET_ENVIRONMENT_DESCRIPTION(state, description) {
+            Vue.set(state.activeEnvironment, 'description', description)
+        },
         SET_ENVIRONMENT_CONFIG(state, payload) {
-            let currentEnvironment = 
-              state.activeApplication.app.environments[state.activeApplication.activeTab];
-              Vue.set(currentEnvironment, 'configuration', payload)
-          },
+            Vue.set(state.activeEnvironment, 'configuration', payload)
+        },
+        SET_ENVIRONMENT_CONFIG_CONTENT(state, payload) {
+            Vue.set(state.activeEnvironment.configuration, 'content', payload)
+        },
         SET_ENVIRONMENT_CONFIGLANG(state, payload) {
-            let currentEnvironmentConfig = 
-                state.activeApplication.app.environments[state.activeApplication.activeTab].configuration;
-            Vue.set(currentEnvironmentConfig, 'format', payload)
+            Vue.set(state.activeEnvironment.configuration, 'format', payload)
         },    
     },
 
@@ -87,19 +102,31 @@ export default {
         },
         async getEnvironments(context) {
             let environments = await appService.getEnvironments(context.state.current.id)
+            environments.push(getNewTab())
             context.commit('SET_ENVIRONMENTS', environments)
         },
-        async createEnvironment(context, payload) {
-            payload.id = await appService.createEnvironment(context.state.current.id, payload)
-            if(!environmentId) return
-            context.commit('ADD_ENVIRONMENT', payload)
+        async saveEnvironment(context) {
+            const wasNew = context.state.activeEnvironment.metadata.isNew
+            let env = await appService.saveEnvironment(context.state.current.id, context.state.activeEnvironment)
+            if(wasNew) {
+                context.commit('COMMIT_NEW_ENVIRONMENT', env)
+            }
         },
-        async deleteEnvironment(context, environmentId) {
-            await appService.deleteEnvironment(context.state.current.id, environmentId)
-            context.commit('DELETE_ENVIRONMENT', environmentId)
+        async deleteEnvironment(context) {
+            if(!context.state.activeEnvironment.id){
+                console.error('Cannot delete undefined!')
+                return
+            }
+            await appService.deleteEnvironment(
+                context.state.current.id, 
+                context.state.activeEnvironment.id)
+
+            await context.commit('DELETE_ENVIRONMENT', context.state.activeEnvironment.id)
+            context.state.activeTab = 0
         },
         addingEnvironment: (context) => {
-            context.commit('ADD_ENVIRONMENT', getNewTab())
+            let newTab = getNewTab()
+            context.commit('ADD_ENVIRONMENT', newTab)
         }
     }
 }

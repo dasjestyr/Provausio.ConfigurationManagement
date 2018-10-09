@@ -62,10 +62,9 @@ export default class ApplicationService {
         let response = await this.client.get(`/${appId}/environments`)
         let environments = []
         if(response.status == 200){
-            console.log(response.data)
             response.data.forEach(env => {
                 environments.push({
-                    id: env.environmentId,
+                    id: env.id,
                     name: env.name,
                     description: env.description,
                     configuration: {
@@ -79,9 +78,10 @@ export default class ApplicationService {
         } 
         return environments
     }
-    async createEnvironment(appId, env) {
-        delete env.metadata.isNew
-        let response = await this.client.post(`/${appId}/environments`, {
+
+    async saveEnvironment(appId, env) {
+        
+        let payload = {
             id: env.id,
             name: env.name,
             description: env.description,
@@ -89,21 +89,26 @@ export default class ApplicationService {
                 content: env.configuration.content,
                 format: env.configuration.format,
                 metadata: env.configuration.metadata
-            },
-            metadata: env.metadata
-        })
-        
-        if(response.status == 201) {
-            console.log(`The new environment id is ${response.data.id}`)
-            return response.data.id
-        } else return null
+            }
+        }
+
+        if(env.metadata.isNew) {
+            delete env.metadata.isNew
+            let response = await this.client.post(`/${appId}/environments/`, payload)
+            env.id = response.data.id
+            if(response.status != 201) {
+                console.error(response.statusText)
+            }
+        } else {
+            let response = await this.client.put(`/${appId}/environments/${env.id}`, payload)
+            if(response.status != 200) {
+                console.error(response.statusText)
+            }            
+        }       
+        return env        
     }
 
-    async saveEnvironment(env) {
-        console.info(`Saved ${env.name}`)
-    }
-
-    async deleteEnvironment(appId, environmentName) {
-        console.info(`KABOOM! Deleted ${environmentName}`)
+    async deleteEnvironment(appId, environmentId) {
+        await this.client.delete(`/${appId}/environments/${environmentId}`)
     }
 }

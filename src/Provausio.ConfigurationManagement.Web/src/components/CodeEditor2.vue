@@ -15,8 +15,8 @@
 
 <script>
 import AceEditor from  './AceEditorVue'
+import { mapState } from 'vuex';
 export default {
-    props: ['content', 'selectedLanguage'],
     components: { 'ace-editor': AceEditor },
     data: () => ({
         languages: ['json', 'javascript', 'yaml', 'xml']
@@ -27,12 +27,24 @@ export default {
         }
     },
     computed: {
+        ...mapState('application', {
+            application: 'current',
+            environment: 'activeEnvironment',
+        }),
         language: {
             get() {
-                return this.$store.getters.getActiveEnvironment.configuration.format
+                return this.environment.configuration.format
             },
             set(v) {
-                this.$store.commit('SET_ENVIRONMENT_CONFIGLANG', v)
+                this.$store.commit('application/SET_ENVIRONMENT_CONFIGLANG', v)
+            }
+        },
+        content: {
+            get() {
+                return this.environment.configuration.content
+            },
+            set(v) {
+                this.$store.commit('application/SET_ENVIRONMENT_CONFIG_CONTENT', v)
             }
         }
     }
