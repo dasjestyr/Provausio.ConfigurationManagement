@@ -118,13 +118,13 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// <param name="name"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        [HttpPut, Route("{applicationId}/environments/{name}")]
-        public async Task<IActionResult> UpdateEnvironment(string applicationId, string name, [FromBody] EnvironmentInfo payload)
+        [HttpPut, Route("{applicationId}/environments/{id}")]
+        public async Task<IActionResult> UpdateEnvironment(string applicationId, string id, [FromBody] EnvironmentInfo payload)
         {
-            if (payload.Name != name)
+            if (payload.Id != id)
                 return BadRequest("names do not match");
 
-            await _definitionStore.UpdateEnvironment(applicationId, name, payload).ConfigureAwait(false);
+            await _definitionStore.UpdateEnvironment(applicationId, id, payload).ConfigureAwait(false);
             return Ok(payload);
         }
 

@@ -142,7 +142,7 @@
                     ? MapConfiguration(info.Configuration)
                     : null,
                 RequiredPermission = info.RequiredPermission,
-                Metadata = info.Metadata
+                Metadata = info.Metadata ?? new Dictionary<string, string>()
             };
             return environment;
         }
@@ -151,13 +151,14 @@
         {
             return new EnvironmentInfo
             {
+                Id = definition.EnvironmentId,
                 Name = definition.Name,
                 Description = definition.Description,
                 Configuration = definition.Configuration != null 
                     ? MapConfigurationInfo(definition.Configuration)
                     : null,
                 RequiredPermission = definition.RequiredPermission,
-                Metadata = definition.Metadata
+                Metadata = definition.Metadata ?? new Dictionary<string, string>()
             };
         }
 
@@ -167,7 +168,7 @@
             {
                 Content = info.Content,
                 Format = info.Format,
-                Metadata = info.Metadata
+                Metadata = info.Metadata ?? new Dictionary<string, string>()
             };
         }
 
@@ -177,7 +178,7 @@
             {
                 Format = definition.Format,
                 Content = definition.Content,
-                Metadata = definition.Metadata
+                Metadata = definition.Metadata ?? new Dictionary<string, string>()
             };
         }
     }
