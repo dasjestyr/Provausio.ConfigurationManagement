@@ -108,7 +108,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         {
             payload.Id = Xid.NewXid().ToString();
             await _definitionStore.CreateEnvironment(applicationId, payload.Id, payload).ConfigureAwait(false);
-            return CreatedWithLocation(payload.Name, payload);
+            return CreatedWithLocation(payload.Id, payload);
         }
 
         /// <summary>
