@@ -28,13 +28,12 @@
 </template>
 
 <script>
-import CodeEditor2 from './CodeEditor2'
-import {mapState, mapMutations, mapActions} from 'vuex'
-import svc from '@/services/ApplicationService'
-const appService = new svc()
+import CodeEditor from './CodeEditor'
+import {mapState, mapActions} from 'vuex'
+
 export default {
     components: {
-        'code-editor': CodeEditor2
+        'code-editor': CodeEditor
     },
     props: ['env'],
     data: () => ({
@@ -45,22 +44,20 @@ export default {
             save: 'saveEnvironment',
             delete: 'deleteEnvironment'
         }),
-        async dirty(id) {
+        async dirty() {
             if(!this.env.metadata.isNew) return;
-
-            if(this.hasCreated && this.env.name === ''){
-                console.log(`deleted ${id}`)
-            } else if(!this.hasCreated) {                
+            
+            if(!this.hasCreated) {                
                 await this.$store.dispatch('application/addingEnvironment')
                 this.hasCreated = true
             }
         },
-        async deleteEnvironment(id) {
+        async deleteEnvironment() {
             await this.delete()         
             this.$store.commit('ui/SHOW_TOAST', `Deleted ${name} environment.`)
         },
         async saveEnvironment(name) {            
-            this.save()
+            await this.save()
             this.$store.commit('ui/SHOW_TOAST', `Saved ${name} environment.`)
         }
     },

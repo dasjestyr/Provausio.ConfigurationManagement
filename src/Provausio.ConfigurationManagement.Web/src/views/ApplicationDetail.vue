@@ -33,7 +33,7 @@
             </v-flex>      
             
             <h2>Environments</h2>
-
+            <v-btn flat color="success" @click="newEnvironmentDiag">Create new</v-btn>
             <v-flex my-4>            
                 <v-tabs color="secondary" slider-color="white" v-model="activeTab">
                     <v-tab                     
@@ -49,26 +49,38 @@
                 </v-tabs>
             </v-flex>
         </div>
+        <new-env-diag
+            :id="newEnvModalId"
+            :model="newEnvironment"
+            :confirmationCallback="createNewEnv"></new-env-diag>
     </v-flex>       
+    
 </template>
 
 <script>
 
 import EditEnvironment from '../components/EditEnvironment'
 import ConfirmDangerous from '../components/ConfirmDangerous'
-import CodeEditor2 from '../components/CodeEditor2'
-import { mapGetters, mapState, mapMutations } from 'vuex';
+import { mapState, mapActions, mapMutations } from 'vuex';
+import NewEnvironmentDiag from '@/components/NewEnvironment'
+import environment from '@/model/Environment'
 
 export default {
     data: () => ({
+        newEnvModalId: 'new-env',
         loading: true,
-        deleteAppModalId: 'delete-app'
+        deleteAppModalId: 'delete-app',
+        newEnvironment: environment.create()
     }),
     components: {
         'editor': EditEnvironment,
+        'new-env-diag': NewEnvironmentDiag,
         'dangerous': ConfirmDangerous
     },
     methods: {
+        ...mapActions('application', {
+            saveEnvironment: 'saveEnvironment'
+        }),
         ...mapMutations('application', {
             clearApplication: 'CLEAR_ACTIVE_APPLICATION'
         }),
@@ -80,6 +92,16 @@ export default {
             await this.$store.dispatch('application/deleteApplication', this.application.id)
             this.$store.commit('ui/SHOW_TOAST', `Deleted ${this.application.name}!`)
             this.$router.push('/applications')            
+        },
+        newEnvironmentDiag() {
+            this.$store.commit('ui/SHOW_MODAL', this.newEnvModalId)
+        },
+        async createNewEnv() {
+            this.newEnvironment.id = xid.next()
+            await this.saveEnvironment(this.newEnvironment)
+            this.newEnvironment = environment.create()
+            this.$store.commit('ui/HIDE_MODAL', this.newEnvModalId)
+            this.$store.commit('ui/SHOW_TOAST', `Saved ${this.newEnvironment.name}!`)
         }
     },
     computed: {
@@ -90,7 +112,7 @@ export default {
         }),
         activeTab : {
             get() {
-                this.$store.getters['application/activeTab']
+                return this.$store.getters['application/activeTab']
             },
             set(value) {
                 this.$store.commit('application/SET_ACTIVE_ENVIRONMENT', value)

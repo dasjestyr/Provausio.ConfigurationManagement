@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import AppService from '../services/ApplicationService'
-import xid from 'xid-js'
 
 import ui from './ui'
 import application from './application'
@@ -9,7 +8,6 @@ import application from './application'
 Vue.use(Vuex)
 
 const appService = new AppService()
-const defaultApp = { activeTab: 0, app: {} }
 
 export default new Vuex.Store({
 

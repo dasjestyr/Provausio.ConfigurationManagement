@@ -4,19 +4,6 @@ import Vue from 'vue'
 
 const appService = new AppService()
 
-function getNewTab() {
-    return {
-        id: xid.next(),
-        name: '+ Add',
-        configuration: {
-            content: '// add configuration here',
-            format: 'javascript',
-            metadata: {}
-        },
-        metadata: { isNew: true }
-    }
-}
-
 export default {    
     namespaced: true,
     state: {
@@ -58,11 +45,6 @@ export default {
         ADD_ENVIRONMENT(state, payload) {
             state.environments.push(payload)            
         },
-        COMMIT_NEW_ENVIRONMENT(state, env) {
-            console.log(env)
-            Vue.set(state.activeEnvironment, 'activeEnvironment', env)    
-            Vue.set(state.activeEnvironment, 'name', env.name)        
-        },
         async DELETE_ENVIRONMENT(state, environmentId) {
             let remainingEnvironments = state.environments.filter(env => {
                 if(env.id !== environmentId) return env
@@ -101,15 +83,21 @@ export default {
             context.commit('DELETE_APPLICATION')
         },
         async getEnvironments(context) {
-            let environments = await appService.getEnvironments(context.state.current.id)
-            environments.push(getNewTab())
+            let environments = await appService.getEnvironments(context.state.current.id)            
             context.commit('SET_ENVIRONMENTS', environments)
         },
-        async saveEnvironment(context) {
-            const wasNew = context.state.activeEnvironment.metadata.isNew
-            let env = await appService.saveEnvironment(context.state.current.id, context.state.activeEnvironment)
-            if(wasNew) {
-                context.commit('COMMIT_NEW_ENVIRONMENT', env)
+        async saveEnvironment(context, payload) {
+            if(payload) { // if payload, then it is a new environment
+                let env = await appService.saveEnvironment(
+                    context.state.current.id,
+                    payload)
+                
+                await context.commit('ADD_ENVIRONMENT', env)
+                
+            } else { // else, save active environment
+                await appService.saveEnvironment(
+                    context.state.current.id, 
+                    context.state.activeEnvironment)
             }
         },
         async deleteEnvironment(context) {
@@ -123,10 +111,6 @@ export default {
 
             await context.commit('DELETE_ENVIRONMENT', context.state.activeEnvironment.id)
             context.state.activeTab = 0
-        },
-        addingEnvironment: (context) => {
-            let newTab = getNewTab()
-            context.commit('ADD_ENVIRONMENT', newTab)
         }
     }
 }
