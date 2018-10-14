@@ -1,25 +1,26 @@
 using System;
+using System.Collections.Generic;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Provausio.ConfigurationManagement.Api.Data.Schemas;
 
 namespace Provausio.ConfigurationManagement.Api.Auth
 {
-    public class UserProvider : IUserStore<UserData>
+    public class UserStore : IUserEmailStore<UserData>, IUserPasswordStore<UserData>
     {
-        private readonly ILogger<UserProvider> _logger;
+        private readonly ILogger<UserStore> _logger;
         private readonly IMongoCollection<UserData> _users;
 
-        public UserProvider(IMongoDatabase database, ILogger<UserProvider> logger)
+        public UserStore(IMongoDatabase database, ILogger<UserStore> logger)
         {
             _logger = logger;
             _users = database.GetCollection<UserData>("users");
         }
-        
-        public void Dispose() { }
 
         public Task<string> GetUserIdAsync(UserData user, CancellationToken cancellationToken)
         {
@@ -156,7 +157,7 @@ namespace Provausio.ConfigurationManagement.Api.Auth
                 if(string.IsNullOrEmpty(normalizedUserName)) throw new ArgumentNullException(nameof(normalizedUserName));
 
                 var user = await _users.FindAsync(
-                        Builders<UserData>.Filter.Eq(u => u.NormalizedUserName, normalizedUserName),
+                        Builders<UserData>.Filter.Eq(u => u.NormalizedUserName, normalizedUserName.ToLower()),
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
@@ -165,9 +166,102 @@ namespace Provausio.ConfigurationManagement.Api.Auth
             }
             catch (Exception e)
             {
-                _logger.LogCritical(e, $"Failed to update user {normalizedUserName ?? "undefined"}");
+                _logger.LogCritical(e, $"Failed to find user {normalizedUserName ?? "undefined"}");
                 return null;
             }
+        }
+        
+        public void Dispose() { }
+        
+        public Task SetEmailAsync(UserData user, string email, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if(string.IsNullOrEmpty(email)) throw new ArgumentNullException(nameof(email));
+            if(user == null) throw new ArgumentNullException(nameof(user));
+            user.Email = email;
+            return Task.CompletedTask;
+        }
+
+        public Task<string> GetEmailAsync(UserData user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if(user == null) throw new ArgumentNullException(nameof(user));
+            return Task.FromResult(user.Email);
+        }
+
+        public Task<bool> GetEmailConfirmedAsync(UserData user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if(user == null) throw new ArgumentNullException(nameof(user));
+            return Task.FromResult(user.EmailConfirmed);
+        }
+
+        public Task SetEmailConfirmedAsync(UserData user, bool confirmed, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            user.EmailConfirmed = confirmed;
+            return Task.CompletedTask;
+        }
+
+        public async Task<UserData> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+        {
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if(string.IsNullOrEmpty(normalizedEmail)) throw new ArgumentNullException(nameof(normalizedEmail));
+
+                var users = await _users.FindAsync(
+                        Builders<UserData>.Filter.Eq(u => u.NormalizedEmail, normalizedEmail),
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+                return await users.SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _logger.LogCritical(e, $"Failed to find user {normalizedEmail ?? "undefined"}");
+                return null;
+            }
+        }
+
+        public Task<string> GetNormalizedEmailAsync(UserData user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if(user == null) throw new ArgumentNullException(nameof(user));
+            return Task.FromResult(user.NormalizedEmail);
+        }
+
+        public Task SetNormalizedEmailAsync(UserData user, string normalizedEmail, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if(user == null) throw new ArgumentNullException(nameof(user));
+            if(string.IsNullOrEmpty(normalizedEmail)) throw new ArgumentNullException(nameof(normalizedEmail));
+            user.NormalizedEmail = normalizedEmail;
+            return Task.CompletedTask;
+        }
+
+        public Task SetPasswordHashAsync(UserData user, string passwordHash, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if(user == null) throw new ArgumentNullException(nameof(user));
+            if(string.IsNullOrEmpty(passwordHash)) throw new ArgumentNullException(nameof(passwordHash));
+            user.Password = passwordHash;
+            return Task.CompletedTask;
+        }
+
+        public Task<string> GetPasswordHashAsync(UserData user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if(user == null) throw new ArgumentNullException(nameof(user));
+            return Task.FromResult(user.Password);
+        }
+
+        public Task<bool> HasPasswordAsync(UserData user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (user == null) throw new ArgumentException(nameof(user));
+            return Task.FromResult(!string.IsNullOrEmpty(user.Password));
         }
     }
 }

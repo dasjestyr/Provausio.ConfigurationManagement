@@ -1,4 +1,7 @@
-﻿namespace Provausio.ConfigurationManagement.Api
+﻿using Microsoft.AspNetCore.Identity;
+using Provausio.ConfigurationManagement.Api.Auth;
+
+namespace Provausio.ConfigurationManagement.Api
 {
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -22,6 +25,8 @@
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMongoDb(Configuration, Environment);
+            services.AddLogging();
+            services.AddAuth(Configuration);
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
@@ -40,6 +45,8 @@
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             //app.UseHttpsRedirection();
+            app.UseAuthentication();
+            
             app.UseMvc();
         }
     }
