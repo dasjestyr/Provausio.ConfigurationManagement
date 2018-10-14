@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -75,6 +74,15 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
             {
                 Token = accessToken
             });
+        }
+
+        [HttpPost, Route("{userId}/roles/{role}")]
+        public async Task<IActionResult> AddUserRole(string userid, string role)
+        {
+            var user = await _userManager.FindByIdAsync(userid);
+            if (user == null) return NotFound();
+            await _userManager.AddToRoleAsync(user, role);
+            return Ok();
         }
 
         [HttpGet, Route("testToken")]

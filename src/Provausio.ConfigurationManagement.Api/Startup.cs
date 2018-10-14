@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Provausio.ConfigurationManagement.Api.Auth;
 
 namespace Provausio.ConfigurationManagement.Api
@@ -25,7 +26,7 @@ namespace Provausio.ConfigurationManagement.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMongoDb(Configuration, Environment);
-            services.AddLogging();
+            services.AddLogging(config => config.AddDebug());
             services.AddAuth(Configuration);
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -46,6 +47,8 @@ namespace Provausio.ConfigurationManagement.Api
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             //app.UseHttpsRedirection();
             app.UseAuthentication();
+            
+            //AuthInstaller.SetDefaultUser(app.ApplicationServices, Configuration);
             
             app.UseMvc();
         }

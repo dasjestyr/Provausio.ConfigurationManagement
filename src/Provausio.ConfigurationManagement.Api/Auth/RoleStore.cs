@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -172,4 +173,6 @@ namespace Provausio.ConfigurationManagement.Api.Auth
         
         public void Dispose() { }
     }
+    
+    
 }

@@ -1,3 +1,7 @@
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
+using MongoDB.Driver.Core.Events;
+
 namespace Provausio.ConfigurationManagement.Api.DependencyInjection
 {
     using System;
@@ -11,12 +15,21 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
     {
         public static void AddMongoDb(this IServiceCollection services, IConfiguration configuration, IHostingEnvironment environment)
         {
-            services.AddSingleton(p => 
+            services.AddSingleton(p =>
             {
-                //var connectionString = configuration["MongoDb:ConnectionString"];
                 var connectionString = Environment.GetEnvironmentVariable("MONGODB_CONN");
+                
+                var logger = p.GetRequiredService<ILogger<Startup>>();
+                var mongoConnectionUrl = new MongoUrl(connectionString);
+                var mongoClientSettings = MongoClientSettings.FromUrl(mongoConnectionUrl);
+                mongoClientSettings.ClusterConfigurator = cb => {
+                    cb.Subscribe<CommandStartedEvent>(e => {
+                        logger.LogInformation($"{e.CommandName} - {e.Command.ToJson()}");
+                    });
+                };
+                
                 Console.Out.WriteLine($"Using connection string {connectionString}");
-                var client = new MongoClient(connectionString);
+                var client = new MongoClient(mongoClientSettings);
 
                 var database = environment.IsDevelopment() ? "provausio_test_1" : "configurationManagement";       
                 

@@ -1,16 +1,22 @@
+using System;
+using System.Data;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Provausio.ConfigurationManagement.Api.Auth;
 using Provausio.ConfigurationManagement.Api.Data.Schemas;
+using XidNet;
 
 namespace Provausio.ConfigurationManagement.Api.DependencyInjection
 {
     public static class AuthInstaller
     {
+        private static readonly string[]  BaseRoles = { "SystemAdmin", "UserAdmin", "User", "Guest" };
+        
         public static void AddAuth(this IServiceCollection services, IConfiguration config)
         {
             services.AddTransient<ITokenService, TokenService>();
@@ -22,6 +28,7 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
                     options.SignIn.RequireConfirmedPhoneNumber = false;
                 })
                 .AddUserManager<UserManager<UserData>>()
+                .AddRoleManager<RoleManager<RoleData>>()
                 .AddSignInManager<SignInManager<UserData>>()
                 .AddUserStore<UserStore>()
                 .AddRoleStore<RoleStore>()
@@ -45,6 +52,51 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
                     IssuerSigningKey = new SymmetricSecurityKey(clientSecret)
                 };
             });
+
+            var provider = services.BuildServiceProvider();
+            SetDefaultUser(provider, config);
+        }
+
+        private static void SetDefaultUser(IServiceProvider provider, IConfiguration config)
+        {
+            var userManager = provider.GetRequiredService<UserManager<UserData>>();
+            var roleManager = provider.GetRequiredService<RoleManager<RoleData>>();
+            var logger = provider.GetRequiredService<ILogger<Startup>>();
+
+            // make sure roles exist
+            logger.LogInformation("Ensuring base roles...");
+            foreach (var role in BaseRoles)
+            {
+                if (roleManager.RoleExistsAsync(role.ToUpper()).Result) continue;
+                var roleData = new RoleData
+                {
+                    Name = role, 
+                    NormalizedName = role.ToLower(), 
+                    RoleId = Xid.NewXid().ToString()
+                };
+                
+                var roleResult = roleManager.CreateAsync(roleData).Result;
+                if(!roleResult.Succeeded) throw new ApplicationException("Failed to add base roles.");
+            }
+            
+            // make sure default user exists with the correct role
+            logger.LogInformation("Ensuring default user...");
+            var defaultUserInfo = config.GetSection("default_user").Get<UserData>();
+            var defaultUser = userManager.FindByNameAsync(defaultUserInfo.Username).Result;
+
+            if (defaultUser != null) 
+                return;
+
+            defaultUserInfo.UserId = Xid.NewXid().ToString();
+            var result = userManager.CreateAsync(defaultUserInfo, defaultUserInfo.Password).Result;
+            if (!result.Succeeded)
+            {
+                throw new ApplicationException("Failed to set default user!!");
+            }
+
+            logger.LogInformation("Ensuring default user roles...");
+            var addRoleResult = userManager.AddToRoleAsync(defaultUserInfo, "SystemAdmin").Result;
+            if(!addRoleResult.Succeeded) throw new ApplicationException("Failed to add admin user to admin role");
         }
     }
 }
