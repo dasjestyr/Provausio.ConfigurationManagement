@@ -9,7 +9,7 @@ using XidNet;
 
 namespace Provausio.ConfigurationManagement.Api.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "global_admin, user_admin")]
     [Route("/users")]
     public class UsersController : Controller
     {
@@ -25,6 +25,26 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
+        }
+
+        [HttpPost, Route("login"), AllowAnonymous]
+        public async Task<IActionResult> Login([FromForm] LoginInfo login)
+        {
+            var user = await _userManager.FindByNameAsync(login.Username).ConfigureAwait(false);
+            if (user == null) return NotFound();
+
+            var x = await _signInManager
+                .PasswordSignInAsync(user.NormalizedUserName, login.Password, false, false)
+                .ConfigureAwait(false);
+
+            if (!x.Succeeded) return Unauthorized();
+
+            var accessToken = _tokenService.GenerateToken(user);
+
+            return Ok(new
+            {
+                Token = accessToken
+            });
         }
 
         [HttpPost, Route("")]
@@ -54,26 +74,6 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
             }
 
             return Created($"/users/{user.UserId}", user);
-        }
-
-        [HttpPost, Route("login"), AllowAnonymous]
-        public async Task<IActionResult> Login([FromForm] LoginInfo login)
-        {
-            var user = await _userManager.FindByNameAsync(login.Username).ConfigureAwait(false);
-            if (user == null) return NotFound();
-            
-            var x = await _signInManager
-                .PasswordSignInAsync(user.NormalizedUserName, login.Password, false, false)
-                .ConfigureAwait(false);
-            
-            if (!x.Succeeded) return Unauthorized();
-            
-            var accessToken = _tokenService.GenerateToken(user);
-            
-            return Ok(new
-            {
-                Token = accessToken
-            });
         }
 
         [HttpPost, Route("{userId}/roles/{role}")]

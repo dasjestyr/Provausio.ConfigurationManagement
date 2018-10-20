@@ -25,6 +25,7 @@ namespace Provausio.ConfigurationManagement.Api.Auth
         
         public string GenerateToken(UserData user)
         {
+            var roles = string.Join(',', user.Roles);
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserId),
@@ -32,7 +33,8 @@ namespace Provausio.ConfigurationManagement.Api.Auth
                 new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
                 new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, roles)
             };
             
             var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["CLIENT_SECRET"])); 

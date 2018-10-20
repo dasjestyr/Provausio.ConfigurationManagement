@@ -15,8 +15,6 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
 {
     public static class AuthInstaller
     {
-        private static readonly string[]  BaseRoles = { "SystemAdmin", "UserAdmin", "User", "Guest" };
-        
         public static void AddAuth(this IServiceCollection services, IConfiguration config)
         {
             services.AddTransient<ITokenService, TokenService>();
@@ -65,7 +63,7 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
 
             // make sure roles exist
             logger.LogInformation("Ensuring base roles...");
-            foreach (var role in BaseRoles)
+            foreach (var role in SystemRole.RoleValues)
             {
                 if (roleManager.RoleExistsAsync(role.ToUpper()).Result) continue;
                 var roleData = new RoleData
@@ -84,19 +82,26 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
             var defaultUserInfo = config.GetSection("default_user").Get<UserData>();
             var defaultUser = userManager.FindByNameAsync(defaultUserInfo.Username).Result;
 
-            if (defaultUser != null) 
-                return;
+            var adminRole = SystemRole.ApplicationAdmin.Name;
 
-            defaultUserInfo.UserId = Xid.NewXid().ToString();
-            var result = userManager.CreateAsync(defaultUserInfo, defaultUserInfo.Password).Result;
-            if (!result.Succeeded)
+            if (defaultUser != null)
             {
-                throw new ApplicationException("Failed to set default user!!");
+                if (defaultUser.Roles.Contains(adminRole)) return;
+                defaultUser.Roles.Add(adminRole);
+                userManager.UpdateAsync(defaultUser).Wait();
             }
+            else
+            {
+                defaultUserInfo.UserId = Xid.NewXid().ToString();
+                defaultUserInfo.Roles.Add(adminRole);
+                var result = userManager.CreateAsync(defaultUserInfo, defaultUserInfo.Password).Result;
+                if (!result.Succeeded)
+                    throw new ApplicationException("Failed to set default user!!");
 
-            logger.LogInformation("Ensuring default user roles...");
-            var addRoleResult = userManager.AddToRoleAsync(defaultUserInfo, "SystemAdmin").Result;
-            if(!addRoleResult.Succeeded) throw new ApplicationException("Failed to add admin user to admin role");
+                logger.LogInformation("Ensuring default user roles...");
+                var addRoleResult = userManager.AddToRoleAsync(defaultUserInfo, "SystemAdmin").Result;
+                if (!addRoleResult.Succeeded) throw new ApplicationException("Failed to add admin user to admin role");
+            }
         }
     }
 }
