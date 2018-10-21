@@ -9,16 +9,11 @@ using Provausio.ConfigurationManagement.Api.Data.Schemas;
 
 namespace Provausio.ConfigurationManagement.Api.Auth
 {
-    public interface ITokenService
-    {
-        string GenerateToken(UserData user);
-    }
-    
-    public class TokenService : ITokenService
+    public class TokenHandler : ITokenHandler
     {
         private readonly IConfiguration _config;
 
-        public TokenService(IConfiguration config)
+        public TokenHandler(IConfiguration config)
         {
             _config = config;
         }

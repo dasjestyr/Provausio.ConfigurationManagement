@@ -1,13 +1,15 @@
 using System;
-using System.Data;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Provausio.ConfigurationManagement.Api.Auth;
+using Provausio.ConfigurationManagement.Api.Auth.Policies;
+using Provausio.ConfigurationManagement.Api.Auth.Stores;
 using Provausio.ConfigurationManagement.Api.Data.Schemas;
 using XidNet;
 
@@ -17,8 +19,19 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
     {
         public static void AddAuth(this IServiceCollection services, IConfiguration config)
         {
-            services.AddTransient<ITokenService, TokenService>();
-            
+            services.AddTransient<ITokenHandler, TokenHandler>();
+            services.AddSingleton<IAuthorizationPolicyProvider, MinimumRolePolicyProvider>();
+            services.AddSingleton<IAuthorizationHandler, MinimumRoleHandler>();
+
+            ConfigureIdentity(services);
+            ConfigureAuthentication(services, config);
+
+            var provider = services.BuildServiceProvider();
+            ConfigureDefaultUser(provider, config);
+        }
+
+        private static void ConfigureIdentity(IServiceCollection services)
+        {
             services
                 .AddIdentity<UserData, RoleData>(options =>
                 {
@@ -32,7 +45,11 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
                 .AddRoleStore<RoleStore>()
                 .AddDefaultTokenProviders();
 
+            services.AddAuthorization();
+        }
 
+        private static void ConfigureAuthentication(IServiceCollection services, IConfiguration config)
+        {
             var clientSecret = Encoding.UTF8.GetBytes(config["CLIENT_SECRET"]);
             services.AddAuthentication(options =>
             {
@@ -50,12 +67,9 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
                     IssuerSigningKey = new SymmetricSecurityKey(clientSecret)
                 };
             });
-
-            var provider = services.BuildServiceProvider();
-            SetDefaultUser(provider, config);
         }
 
-        private static void SetDefaultUser(IServiceProvider provider, IConfiguration config)
+        private static void ConfigureDefaultUser(IServiceProvider provider, IConfiguration config)
         {
             var userManager = provider.GetRequiredService<UserManager<UserData>>();
             var roleManager = provider.GetRequiredService<RoleManager<RoleData>>();
@@ -82,7 +96,7 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
             var defaultUserInfo = config.GetSection("default_user").Get<UserData>();
             var defaultUser = userManager.FindByNameAsync(defaultUserInfo.Username).Result;
 
-            var adminRole = SystemRole.ApplicationAdmin.Name;
+            var adminRole = SystemRole.GlobalAdmin.Name;
 
             if (defaultUser != null)
             {

@@ -22,17 +22,15 @@ namespace Provausio.ConfigurationManagement.Api
             Environment = environment;
         }               
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMongoDb(Configuration, Environment);
             services.AddLogging(config => config.AddDebug());
             services.AddAuth(Configuration);
             services.AddCors();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(options => options.AllowCombiningAuthorizeFilters = false).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (!env.IsProduction())
@@ -46,10 +44,8 @@ namespace Provausio.ConfigurationManagement.Api
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             //app.UseHttpsRedirection();
+
             app.UseAuthentication();
-            
-            //AuthInstaller.SetDefaultUser(app.ApplicationServices, Configuration);
-            
             app.UseMvc();
         }
     }

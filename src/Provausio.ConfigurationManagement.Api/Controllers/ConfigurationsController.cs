@@ -1,11 +1,13 @@
 namespace Provausio.ConfigurationManagement.Api.Controllers
 {
+    using Microsoft.AspNetCore.Authorization;
     using System.Threading.Tasks;
     using Data;
     using Microsoft.AspNetCore.Mvc;
     using Model;
 
-    [Route("applications/{applicationId}/environment/{environmentName}")]
+    [Authorize]
+    [Route("applications/{applicationId}/environments/{environmentName}")]
     public class ConfigurationsController : RestController
     {
         private readonly IApplicationDefinitionStore _definitionStore;
@@ -23,7 +25,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// <param name="environmentId"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        [HttpPost, Route("/")]
+        [HttpPost, Route("")]
         public async Task<IActionResult> CreateConfiguration(
             string applicationId, 
             string environmentName, 
@@ -40,7 +42,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// <param name="applicationId"></param>
         /// <param name="environmentName"></param>
         /// <returns></returns>
-        [HttpGet, Route("/configuration")]
+        [HttpGet, Route("configuration")]
         public async Task<IActionResult> GetConfiguration(string applicationId, string environmentName)
         {
             var configuration = await _definitionStore
@@ -49,6 +51,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
 
             if (configuration == null)
                 return NotFound();
+
             return Ok(configuration);
         }
 
@@ -59,7 +62,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// <param name="environmentName"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        [HttpPut, Route("/configuration")]
+        [HttpPut, Route("configuration")]
         public async Task<IActionResult> UpdateConfiguration(string applicationId, string environmentName, ConfigurationInfo payload)
         {
             await _definitionStore
@@ -75,7 +78,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
         /// <param name="applicationId"></param>
         /// <param name="environmentName"></param>
         /// <returns></returns>
-        [HttpDelete, Route("/{configurationId}")]
+        [HttpDelete, Route("{configurationId}")]
         public async Task<IActionResult> DeleteConfiguration(string applicationId, string environmentName)
         {
             await _definitionStore.SaveConfiguration(applicationId, environmentName, new ConfigurationInfo());

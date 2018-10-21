@@ -15,16 +15,16 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
     {
         private readonly UserManager<UserData> _userManager;
         private readonly SignInManager<UserData> _signInManager;
-        private readonly ITokenService _tokenService;
+        private readonly ITokenHandler _tokenHandler;
 
         public UsersController(
             UserManager<UserData> userManager,
             SignInManager<UserData> signInManager,
-            ITokenService tokenService)
+            ITokenHandler tokenHandler)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _tokenService = tokenService;
+            _tokenHandler = tokenHandler;
         }
 
         [HttpPost, Route("login"), AllowAnonymous]
@@ -39,7 +39,7 @@ namespace Provausio.ConfigurationManagement.Api.Controllers
 
             if (!x.Succeeded) return Unauthorized();
 
-            var accessToken = _tokenService.GenerateToken(user);
+            var accessToken = _tokenHandler.GenerateToken(user);
 
             return Ok(new
             {

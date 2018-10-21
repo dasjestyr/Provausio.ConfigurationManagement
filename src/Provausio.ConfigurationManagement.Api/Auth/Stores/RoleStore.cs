@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -7,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Provausio.ConfigurationManagement.Api.Data.Schemas;
 
-namespace Provausio.ConfigurationManagement.Api.Auth
+namespace Provausio.ConfigurationManagement.Api.Auth.Stores
 {
     public class RoleStore : IRoleStore<RoleData>
     {

@@ -17,14 +17,14 @@ namespace Provausio.ConfigurationManagement.Api.DependencyInjection
         {
             services.AddSingleton(p =>
             {
-                var connectionString = Environment.GetEnvironmentVariable("MONGODB_CONN");
+                var connectionString = configuration["MONGODB_CONN"] ?? "mongodb://localhost"; // BUG: why is this null
                 
                 var logger = p.GetRequiredService<ILogger<Startup>>();
                 var mongoConnectionUrl = new MongoUrl(connectionString);
                 var mongoClientSettings = MongoClientSettings.FromUrl(mongoConnectionUrl);
                 mongoClientSettings.ClusterConfigurator = cb => {
                     cb.Subscribe<CommandStartedEvent>(e => {
-                        logger.LogInformation($"{e.CommandName} - {e.Command.ToJson()}");
+                        logger.LogTrace($"{e.CommandName} - {e.Command.ToJson()}");
                     });
                 };
                 

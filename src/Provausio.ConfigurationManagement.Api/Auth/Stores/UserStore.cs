@@ -1,18 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Provausio.ConfigurationManagement.Api.Data.Schemas;
 
-namespace Provausio.ConfigurationManagement.Api.Auth
+namespace Provausio.ConfigurationManagement.Api.Auth.Stores
 {
     public class UserStore : IUserEmailStore<UserData>, IUserPasswordStore<UserData>, IUserRoleStore<UserData>
     {
